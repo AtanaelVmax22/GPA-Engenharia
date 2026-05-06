@@ -1,117 +1,97 @@
 <% content_for :page_title, "Novo Post" %>
 
-<div class="max-w-lg mx-auto">
-  <div class="flex items-center gap-3 mb-5">
-    <%= link_to "←", post_tecnicos_path, class: "text-zinc-400 hover:text-zinc-100 text-xl" %>
-    <h1 class="font-bold text-zinc-100">Novo Post Técnico</h1>
+<div class="max-w-lg mx-auto pb-10">
+
+  <!-- Header fixo -->
+  <div class="flex items-center gap-3 mb-4">
+    <%= link_to "←", post_tecnicos_path, class: "text-zinc-400 hover:text-zinc-100 text-xl w-8" %>
+    <h1 class="font-bold text-zinc-100 flex-1">Novo Post Técnico</h1>
   </div>
 
-  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-    <%= form_with model: PostTecnico.new, url: post_tecnicos_path, html: { enctype: "multipart/form-data" } do |f| %>
+  <%= form_with model: PostTecnico.new, url: post_tecnicos_path, html: { enctype: "multipart/form-data" } do |f| %>
 
-      <!-- Preview de fotos selecionadas -->
-      <div id="preview-container" class="hidden">
-        <div id="preview-grid" class="grid grid-cols-3 gap-0.5"></div>
+    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden space-y-0">
+
+      <!-- Linha do usuário -->
+      <div class="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+        <div class="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center text-zinc-900 font-bold text-sm flex-shrink-0">
+          <%= current_user.nome.first.upcase %>
+        </div>
+        <p class="text-sm font-semibold text-zinc-200"><%= current_user.nome %></p>
       </div>
 
-      <!-- Área de upload de foto -->
-      <div class="border-b border-zinc-800">
-        <label class="block cursor-pointer">
-          <div id="upload-placeholder" class="flex flex-col items-center justify-center py-12 gap-3 text-zinc-600 hover:text-zinc-400 transition-colors">
-            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            <div class="text-center">
-              <p class="font-semibold text-sm">Adicionar fotos</p>
-              <p class="text-xs mt-1">Toque para capturar ou escolher da galeria</p>
-            </div>
-            <div class="flex gap-3 mt-1">
-              <span class="flex items-center gap-1 text-xs bg-zinc-800 px-3 py-1.5 rounded-lg">📷 Câmera</span>
-              <span class="flex items-center gap-1 text-xs bg-zinc-800 px-3 py-1.5 rounded-lg">🖼 Galeria</span>
-            </div>
-          </div>
+      <!-- Texto do post -->
+      <div class="px-4 py-3 border-b border-zinc-800">
+        <%= f.text_area :conteudo, rows: 4,
+            placeholder: "Compartilhe uma dica técnica, procedimento ou solução...",
+            class: "w-full bg-transparent text-zinc-200 placeholder-zinc-600 text-sm resize-none outline-none border-0 focus:outline-none leading-relaxed" %>
+      </div>
 
-          <!-- Input aceita câmera e galeria no mobile -->
-          <%= f.file_field :fotos, multiple: true, accept: "image/*",
-              capture: false,
-              id: "fotos-input",
-              class: "hidden",
-              onchange: "previewFotos(this)" %>
+      <!-- Título -->
+      <div class="px-4 py-3 border-b border-zinc-800">
+        <%= f.label :titulo, "Título (opcional)", class: "block text-xs text-zinc-600 mb-1" %>
+        <%= f.text_field :titulo,
+            placeholder: "Ex: Falha no portão PPA — solução",
+            class: "w-full bg-transparent text-zinc-200 placeholder-zinc-600 text-sm outline-none border-0 focus:outline-none" %>
+      </div>
+
+      <!-- Condomínio -->
+      <div class="px-4 py-3 border-b border-zinc-800">
+        <%= f.label :condominio_id, "Condomínio (opcional)", class: "block text-xs text-zinc-600 mb-1" %>
+        <%= f.select :condominio_id,
+            @condominios.map { |c| [c.nome, c.id] },
+            { include_blank: "Post geral" },
+            class: "w-full bg-transparent text-zinc-300 text-sm outline-none border-0 focus:outline-none" %>
+      </div>
+
+      <!-- Preview das fotos selecionadas -->
+      <div id="preview-container" class="hidden border-b border-zinc-800">
+        <div id="preview-grid" class="grid grid-cols-3 gap-0.5 max-h-64 overflow-hidden"></div>
+        <label for="fotos-input" class="flex items-center justify-center gap-2 py-2 text-xs text-zinc-500 hover:text-amber-400 cursor-pointer transition-colors">
+          + Adicionar mais fotos
         </label>
       </div>
 
-      <!-- Campos do post -->
-      <div class="p-4 space-y-4">
-
-        <!-- Avatar + conteúdo -->
-        <div class="flex gap-3">
-          <div class="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center text-zinc-900 font-bold text-sm flex-shrink-0 mt-0.5">
-            <%= current_user.nome.first.upcase %>
-          </div>
-          <div class="flex-1">
-            <p class="text-sm font-semibold text-zinc-200 mb-2"><%= current_user.nome %></p>
-            <%= f.text_area :conteudo, rows: 4,
-                placeholder: "Compartilhe um procedimento técnico, solução de problema ou dica para a equipe...",
-                class: "w-full bg-transparent text-zinc-300 placeholder-zinc-600 text-sm resize-none outline-none border-0 focus:outline-none leading-relaxed" %>
-          </div>
-        </div>
-
-        <div class="border-t border-zinc-800 pt-4 space-y-3">
-          <!-- Título (opcional) -->
-          <div>
-            <%= f.label :titulo, "Título (opcional)", class: "block text-xs font-medium text-zinc-500 mb-1" %>
-            <%= f.text_field :titulo,
-                placeholder: "Ex: Como resolver falha no portão PPA DZ",
-                class: "w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-          </div>
-
-          <!-- Condomínio -->
-          <div>
-            <%= f.label :condominio_id, "Condomínio (opcional)", class: "block text-xs font-medium text-zinc-500 mb-1" %>
-            <%= f.select :condominio_id,
-                @condominios.map { |c| [c.nome, c.id] },
-                { include_blank: "Post geral" },
-                class: "w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-          </div>
-        </div>
-
-        <!-- Botão de captura alternativo (mobile) -->
-        <div class="border-t border-zinc-800 pt-4">
-          <p class="text-xs text-zinc-600 mb-3">Adicionar mídia</p>
-          <div class="flex gap-3">
-            <label for="fotos-input" class="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-sm text-zinc-300 cursor-pointer transition-colors flex-1 justify-center">
-              <span class="text-base">📷</span> Tirar foto
-            </label>
-            <label for="fotos-input" class="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-sm text-zinc-300 cursor-pointer transition-colors flex-1 justify-center">
-              <span class="text-base">🖼</span> Galeria
-            </label>
-          </div>
-        </div>
-
-        <%= f.submit "Publicar", class: "w-full py-3 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-bold rounded-xl text-sm cursor-pointer transition-colors mt-2" %>
+      <!-- Botões de mídia -->
+      <div class="px-4 py-3 flex gap-3">
+        <label for="fotos-input" class="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 rounded-xl text-sm text-zinc-300 cursor-pointer transition-colors flex-1 justify-center select-none">
+          <span class="text-base">📷</span>
+          <span>Tirar Foto</span>
+        </label>
+        <label for="fotos-input" class="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 rounded-xl text-sm text-zinc-300 cursor-pointer transition-colors flex-1 justify-center select-none">
+          <span class="text-base">🖼</span>
+          <span>Galeria</span>
+        </label>
+        <%= f.file_field :fotos, multiple: true, accept: "image/*",
+            id: "fotos-input", class: "hidden",
+            onchange: "previewFotos(this)" %>
       </div>
-    <% end %>
-  </div>
+
+      <!-- Botão publicar -->
+      <div class="px-4 pb-4">
+        <%= f.submit "Publicar",
+            class: "w-full py-3 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-zinc-900 font-bold rounded-xl text-sm cursor-pointer transition-colors" %>
+      </div>
+
+    </div>
+  <% end %>
 </div>
 
 <script>
 function previewFotos(input) {
   const container = document.getElementById('preview-container');
   const grid = document.getElementById('preview-grid');
-  const placeholder = document.getElementById('upload-placeholder');
 
   grid.innerHTML = '';
 
   if (input.files && input.files.length > 0) {
     container.classList.remove('hidden');
-    placeholder.classList.add('hidden');
 
-    Array.from(input.files).forEach(file => {
+    Array.from(input.files).slice(0, 9).forEach(file => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const div = document.createElement('div');
-        div.className = 'aspect-square overflow-hidden';
+        div.className = 'aspect-square overflow-hidden relative';
         const img = document.createElement('img');
         img.src = e.target.result;
         img.className = 'w-full h-full object-cover';
@@ -122,7 +102,6 @@ function previewFotos(input) {
     });
   } else {
     container.classList.add('hidden');
-    placeholder.classList.remove('hidden');
   }
 }
 </script>
