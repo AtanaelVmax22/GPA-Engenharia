@@ -21,6 +21,7 @@ Rails.application.routes.draw do
 
   resources :post_tecnicos do
     resources :comentarios, only: [:create, :destroy]
+    resources :curtidas, only: [:create, :destroy]
   end
 
   namespace :admin do

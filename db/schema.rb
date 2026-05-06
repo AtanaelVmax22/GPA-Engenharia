@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_06_005649) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_06_023156) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -91,6 +91,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_06_005649) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "curtidas", force: :cascade do |t|
+    t.bigint "post_tecnico_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["post_tecnico_id"], name: "index_curtidas_on_post_tecnico_id"
+    t.index ["user_id"], name: "index_curtidas_on_user_id"
+  end
+
   create_table "equipamentos", force: :cascade do |t|
     t.bigint "condominio_id", null: false
     t.string "nome"
@@ -158,6 +167,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_06_005649) do
   add_foreign_key "checklists", "users"
   add_foreign_key "comentarios", "post_tecnicos"
   add_foreign_key "comentarios", "users"
+  add_foreign_key "curtidas", "post_tecnicos"
+  add_foreign_key "curtidas", "users"
   add_foreign_key "equipamentos", "condominios"
   add_foreign_key "historico_tecnicos", "condominios"
   add_foreign_key "historico_tecnicos", "equipamentos"

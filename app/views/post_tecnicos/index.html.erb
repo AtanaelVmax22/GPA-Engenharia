@@ -1,57 +1,157 @@
 <% content_for :page_title, "Feed Técnico" %>
 
-<div class="flex items-center justify-between mb-6">
-  <div></div>
-  <%= link_to "+ Novo Post", new_post_tecnico_path, class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold rounded-xl text-sm transition-colors" %>
-</div>
+<div class="max-w-lg mx-auto">
 
-<!-- Search -->
-<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-6">
-  <%= form_with url: post_tecnicos_path, method: :get, class: "flex gap-3" do |f| %>
-    <%= f.text_field :q, value: params[:q], placeholder: "Buscar posts técnicos...",
-        class: "flex-1 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500" %>
-    <%= f.submit "Buscar", class: "px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-100 rounded-xl text-sm cursor-pointer" %>
+  <!-- Header com botão novo post -->
+  <div class="flex items-center justify-between mb-5">
+    <div class="flex items-center gap-2">
+      <span class="text-amber-400 text-lg">◈</span>
+      <span class="font-bold text-zinc-100">Feed Técnico</span>
+    </div>
+    <%= link_to new_post_tecnico_path, class: "flex items-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-bold rounded-xl text-sm transition-colors" do %>
+      <span class="text-lg leading-none">+</span> Postar
+    <% end %>
+  </div>
+
+  <!-- Search -->
+  <%= form_with url: post_tecnicos_path, method: :get, class: "mb-5" do |f| %>
+    <div class="relative">
+      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">⌕</span>
+      <%= f.text_field :q, value: params[:q], placeholder: "Buscar posts...",
+          class: "w-full pl-9 pr-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-100 placeholder-zinc-600 text-sm focus:outline-none focus:border-amber-500" %>
+    </div>
   <% end %>
-</div>
 
-<div class="space-y-4">
-  <% @posts.each do |post| %>
-    <div class="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-6 transition-colors">
-      <div class="flex items-start gap-4">
-        <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-zinc-900 font-bold text-sm flex-shrink-0">
-          <%= post.user.nome.first.upcase %>
-        </div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 flex-wrap mb-1">
-            <span class="text-sm font-semibold text-zinc-200"><%= post.user.nome %></span>
-            <span class="text-xs text-zinc-600">&mdash;</span>
-            <span class="text-xs text-zinc-500"><%= time_ago_in_words(post.created_at) %> atrás</span>
-            <% if post.condominio %>
-              <span class="text-xs bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded"><%= post.condominio.nome %></span>
-            <% end %>
+  <!-- Posts feed -->
+  <div class="space-y-5">
+    <% @posts.each do |post| %>
+      <article class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+
+        <!-- Header do post -->
+        <div class="flex items-center justify-between px-4 py-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center text-zinc-900 font-bold text-sm flex-shrink-0">
+              <%= post.user.nome.first.upcase %>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-zinc-100 leading-tight"><%= post.user.nome %></p>
+              <% if post.condominio %>
+                <p class="text-xs text-zinc-500"><%= post.condominio.nome %></p>
+              <% end %>
+            </div>
           </div>
-          <h3 class="font-semibold text-zinc-100 mb-2"><%= link_to post.titulo, post, class: "hover:text-amber-400 transition-colors" %></h3>
-          <p class="text-sm text-zinc-400 line-clamp-3"><%= truncate(post.conteudo, length: 200) %></p>
-          <div class="flex items-center gap-4 mt-3 text-xs text-zinc-600">
-            <span>💬 <%= post.comentarios.count %> comentário(s)</span>
-            <%= link_to "Ver post", post, class: "text-amber-400 hover:text-amber-300" %>
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-zinc-600"><%= time_ago_in_words(post.created_at) %> atrás</span>
             <% if post.user == current_user || current_user.admin? %>
-              <%= button_to "Remover", post, method: :delete,
-                  data: { confirm: "Remover este post?" },
-                  class: "text-red-500 hover:text-red-400 bg-transparent border-0 p-0 cursor-pointer" %>
+              <%= button_to post_tecnico_path(post), method: :delete,
+                  data: { confirm: "Remover post?" },
+                  class: "text-zinc-600 hover:text-red-400 text-base bg-transparent border-0 cursor-pointer leading-none" do %>&#x2715;<% end %>
             <% end %>
           </div>
         </div>
-      </div>
-    </div>
-  <% end %>
-  <% if @posts.empty? %>
-    <div class="text-center py-16 text-zinc-600">
-      <div class="text-4xl mb-3">◈</div>
-      <p>Nenhum post técnico encontrado.</p>
-      <%= link_to "Publicar o primeiro", new_post_tecnico_path, class: "text-amber-400 hover:text-amber-300 text-sm mt-2 inline-block" %>
-    </div>
-  <% end %>
-</div>
 
-<%== pagy_nav(@pagy) if @pagy.pages > 1 rescue nil %>
+        <!-- Fotos -->
+        <% if post.fotos.attached? %>
+          <% fotos = post.fotos.to_a %>
+          <% if fotos.size == 1 %>
+            <%= link_to post_tecnico_path(post) do %>
+              <%= image_tag fotos.first, class: "w-full aspect-square object-cover" %>
+            <% end %>
+          <% else %>
+            <div class="grid grid-cols-2 gap-0.5">
+              <% fotos.first(4).each_with_index do |foto, i| %>
+                <div class="relative">
+                  <%= image_tag foto, class: "w-full aspect-square object-cover" %>
+                  <% if i == 3 && fotos.size > 4 %>
+                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <span class="text-white text-2xl font-bold">+<%= fotos.size - 4 %></span>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+
+        <!-- Ações -->
+        <div class="px-4 pt-3 pb-1">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-4">
+              <!-- Curtir -->
+              <% if post.curtido_por?(current_user) %>
+                <%= button_to post_tecnico_curtida_path(post, post.curtidas.find_by(user: current_user)),
+                    method: :delete, class: "flex items-center gap-1.5 text-red-500 bg-transparent border-0 cursor-pointer p-0 group" do %>
+                  <span class="text-xl leading-none group-hover:scale-110 transition-transform">♥</span>
+                  <span class="text-sm font-semibold"><%= post.curtidas.count %></span>
+                <% end %>
+              <% else %>
+                <%= button_to post_tecnico_curtidas_path(post),
+                    method: :post, class: "flex items-center gap-1.5 text-zinc-400 hover:text-red-500 bg-transparent border-0 cursor-pointer p-0 group" do %>
+                  <span class="text-xl leading-none group-hover:scale-110 transition-transform">♡</span>
+                  <span class="text-sm font-semibold"><%= post.curtidas.count %></span>
+                <% end %>
+              <% end %>
+
+              <!-- Comentar -->
+              <%= link_to post_tecnico_path(post), class: "flex items-center gap-1.5 text-zinc-400 hover:text-zinc-200" do %>
+                <span class="text-xl leading-none">💬</span>
+                <span class="text-sm font-semibold"><%= post.comentarios.count %></span>
+              <% end %>
+            </div>
+
+            <!-- Salvar -->
+            <span class="text-zinc-600 text-xl">🔖</span>
+          </div>
+
+          <!-- Título e caption -->
+          <% if post.titulo.present? %>
+            <p class="text-sm font-semibold text-zinc-100 mb-0.5"><%= post.titulo %></p>
+          <% end %>
+          <p class="text-sm text-zinc-300 leading-relaxed">
+            <span class="font-semibold text-zinc-100"><%= post.user.nome %></span>
+            <%= truncate(post.conteudo, length: 120, omission: "... ") %>
+            <% if post.conteudo.length > 120 %>
+              <%= link_to "mais", post_tecnico_path(post), class: "text-zinc-500 hover:text-amber-400 text-xs" %>
+            <% end %>
+          </p>
+
+          <!-- Preview comentários -->
+          <% if post.comentarios.count > 0 %>
+            <%= link_to "Ver todos os #{post.comentarios.count} comentários", post_tecnico_path(post), class: "text-xs text-zinc-600 hover:text-zinc-400 block mt-1.5" %>
+            <% post.comentarios.includes(:user).order(:created_at).last(2).each do |c| %>
+              <p class="text-sm text-zinc-300 mt-1">
+                <span class="font-semibold text-zinc-100"><%= c.user.nome %></span>
+                <%= truncate(c.conteudo, length: 80) %>
+              </p>
+            <% end %>
+          <% end %>
+
+          <p class="text-xs text-zinc-700 mt-2 uppercase tracking-wide"><%= post.created_at.strftime("%d de %B") %></p>
+        </div>
+
+        <!-- Input rápido de comentário -->
+        <div class="px-4 py-3 border-t border-zinc-800 flex items-center gap-3">
+          <div class="w-7 h-7 rounded-full bg-amber-500 flex items-center justify-center text-zinc-900 font-bold text-xs flex-shrink-0">
+            <%= current_user.nome.first.upcase %>
+          </div>
+          <%= form_with url: post_tecnico_comentarios_path(post), class: "flex-1 flex items-center gap-2" do |f| %>
+            <%= f.text_field :comentario, name: "comentario[conteudo]", placeholder: "Adicionar comentário...",
+                class: "flex-1 bg-transparent text-sm text-zinc-300 placeholder-zinc-600 outline-none border-0 focus:outline-none" %>
+            <%= f.submit "Publicar", class: "text-xs font-bold text-amber-400 hover:text-amber-300 cursor-pointer bg-transparent border-0" %>
+          <% end %>
+        </div>
+
+      </article>
+    <% end %>
+  </div>
+
+  <% if @posts.empty? %>
+    <div class="text-center py-20 text-zinc-600">
+      <div class="text-5xl mb-4">◈</div>
+      <p class="text-lg">Nenhum post ainda.</p>
+      <%= link_to "Ser o primeiro a postar", new_post_tecnico_path, class: "text-amber-400 hover:text-amber-300 text-sm mt-2 inline-block" %>
+    </div>
+  <% end %>
+
+  <%== pagy_nav(@pagy) if @pagy.pages > 1 rescue nil %>
+</div>
