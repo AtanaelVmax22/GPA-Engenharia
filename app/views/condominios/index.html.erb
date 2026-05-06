@@ -1,0 +1,62 @@
+<% content_for :page_title, "Condomínios" %>
+
+<div class="flex items-center justify-between mb-6">
+  <div></div>
+  <%= link_to "+ Novo Condomínio", new_condominio_path, class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold rounded-xl text-sm transition-colors" %>
+</div>
+
+<!-- Filters -->
+<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-6">
+  <%= form_with url: condominios_path, method: :get, class: "flex gap-3 flex-wrap" do |f| %>
+    <%= f.text_field :q, value: params[:q], placeholder: "Buscar condomínio...",
+        class: "flex-1 min-w-48 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500" %>
+    <%= f.select :status, [["Todos os status", ""], ["Ativos", "ativo"], ["Inativos", "inativo"]],
+        { selected: params[:status] },
+        class: "px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
+    <%= f.submit "Buscar", class: "px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-100 rounded-xl text-sm cursor-pointer transition-colors" %>
+  <% end %>
+</div>
+
+<!-- Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+  <% @condominios.each do |c| %>
+    <div class="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-5 transition-colors">
+      <div class="flex items-start justify-between mb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-bold text-sm">
+            ⌂
+          </div>
+          <div>
+            <h3 class="font-semibold text-zinc-100 text-sm leading-tight"><%= c.nome %></h3>
+            <p class="text-xs text-zinc-500"><%= c.cidade %>, <%= c.estado %></p>
+          </div>
+        </div>
+        <%= status_badge(c.status) %>
+      </div>
+
+      <div class="text-xs text-zinc-500 space-y-1 mb-4">
+        <div><span class="text-zinc-600">Síndico:</span> <%= c.sindico_nome.presence || "—" %></div>
+        <div><span class="text-zinc-600">Unidades:</span> <%= c.unidades || "—" %></div>
+        <div><span class="text-zinc-600">Equip.:</span> <%= c.equipamentos.count %></div>
+        <% if c.ultima_visita %>
+          <div><span class="text-zinc-600">Última visita:</span> <%= c.ultima_visita.strftime("%d/%m/%Y") %></div>
+        <% end %>
+      </div>
+
+      <div class="flex gap-2">
+        <%= link_to "Ver detalhes", c, class: "flex-1 text-center px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs transition-colors" %>
+        <%= link_to "Editar", edit_condominio_path(c), class: "px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs transition-colors" %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if @condominios.empty? %>
+  <div class="text-center py-16 text-zinc-600">
+    <div class="text-4xl mb-3">⌂</div>
+    <p>Nenhum condomínio encontrado.</p>
+    <%= link_to "Cadastrar primeiro condomínio", new_condominio_path, class: "text-amber-400 hover:text-amber-300 text-sm mt-2 inline-block" %>
+  </div>
+<% end %>
+
+<%== pagy_nav(@pagy) if @pagy.pages > 1 rescue nil %>

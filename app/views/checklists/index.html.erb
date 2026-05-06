@@ -1,0 +1,46 @@
+<% content_for :page_title, "Checklists — #{@condominio.nome}" %>
+
+<div class="flex items-center justify-between mb-6">
+  <%= link_to "← #{@condominio.nome}", @condominio, class: "text-sm text-zinc-500 hover:text-zinc-300" %>
+  <%= link_to "+ Novo Checklist", new_condominio_checklist_path(@condominio), class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold rounded-xl text-sm transition-colors" %>
+</div>
+
+<div class="space-y-3">
+  <% @checklists.each do |c| %>
+    <div class="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-5 transition-colors">
+      <div class="flex items-center justify-between gap-4">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-1">
+            <%= status_badge(c.status) %>
+            <span class="text-xs text-zinc-600"><%= c.user.nome %></span>
+          </div>
+          <h3 class="font-semibold text-zinc-100 truncate"><%= c.titulo %></h3>
+          <p class="text-xs text-zinc-500 mt-0.5">
+            <%= c.data_visita&.strftime("%d/%m/%Y %H:%M") || "Sem data" %>
+            &mdash; <%= c.checklist_items.where(concluido: true).count %>/<%= c.checklist_items.count %> itens
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <% prog = c.progresso %>
+          <div class="text-right">
+            <span class="text-sm font-bold <%= prog == 100 ? 'text-emerald-400' : 'text-amber-400' %>"><%= prog %>%</span>
+          </div>
+          <%= link_to "Abrir", c, class: "px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs transition-colors" %>
+        </div>
+      </div>
+      <div class="mt-3">
+        <div class="w-full bg-zinc-800 rounded-full h-1.5">
+          <div class="<%= prog == 100 ? 'bg-emerald-500' : 'bg-amber-500' %> h-1.5 rounded-full" style="width: <%= prog %>%"></div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @checklists.empty? %>
+    <div class="text-center py-16 text-zinc-600">
+      <div class="text-4xl mb-3">✓</div>
+      <p>Nenhum checklist criado ainda.</p>
+      <%= link_to "Criar primeiro checklist", new_condominio_checklist_path(@condominio), class: "text-amber-400 hover:text-amber-300 text-sm mt-2 inline-block" %>
+    </div>
+  <% end %>
+</div>

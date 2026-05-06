@@ -1,0 +1,53 @@
+<%= form_with model: equipamento.new_record? ? [@condominio, equipamento] : equipamento, class: "space-y-6" do |f| %>
+  <% if equipamento.errors.any? %>
+    <div class="bg-red-900/50 border border-red-700 rounded-xl p-4 text-red-300 text-sm">
+      <% equipamento.errors.full_messages.each do |msg| %><div>&bull; <%= msg %></div><% end %>
+    </div>
+  <% end %>
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+    <h2 class="text-base font-semibold text-amber-400 mb-4">Equipamento</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="md:col-span-2">
+        <%= f.label :nome, "Nome do Equipamento", class: "block text-sm font-medium text-zinc-300 mb-1" %>
+        <%= f.text_field :nome, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
+      </div>
+      <div>
+        <%= f.label :categoria, "Categoria", class: "block text-sm font-medium text-zinc-300 mb-1" %>
+        <%= f.select :categoria, Equipamento::CATEGORIAS, {}, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
+      </div>
+      <div>
+        <%= f.label :status, "Status", class: "block text-sm font-medium text-zinc-300 mb-1" %>
+        <%= f.select :status, Equipamento.statuses.keys.map { |s| [s.humanize, s] }, {}, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
+      </div>
+      <div>
+        <%= f.label :marca, "Marca", class: "block text-sm font-medium text-zinc-300 mb-1" %>
+        <%= f.text_field :marca, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
+      </div>
+      <div>
+        <%= f.label :modelo, "Modelo", class: "block text-sm font-medium text-zinc-300 mb-1" %>
+        <%= f.text_field :modelo, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
+      </div>
+      <div>
+        <%= f.label :numero_serie, "Número de Série", class: "block text-sm font-medium text-zinc-300 mb-1" %>
+        <%= f.text_field :numero_serie, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
+      </div>
+      <div>
+        <%= f.label :data_instalacao, "Data de Instalação", class: "block text-sm font-medium text-zinc-300 mb-1" %>
+        <%= f.date_field :data_instalacao, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
+      </div>
+      <div class="md:col-span-2">
+        <%= f.label :localizacao, "Localização no Condomínio", class: "block text-sm font-medium text-zinc-300 mb-1" %>
+        <%= f.text_field :localizacao, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500", placeholder: "Ex: Garagem subsolo, portaria social..." %>
+      </div>
+      <div class="md:col-span-2">
+        <%= f.label :observacoes, "Observações", class: "block text-sm font-medium text-zinc-300 mb-1" %>
+        <%= f.text_area :observacoes, rows: 3, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500 resize-none" %>
+      </div>
+    </div>
+  </div>
+  <div class="flex gap-3">
+    <%= f.submit equipamento.new_record? ? "Cadastrar Equipamento" : "Salvar Alterações",
+        class: "px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold rounded-xl text-sm cursor-pointer transition-colors" %>
+    <%= link_to "Cancelar", condominio_path(@condominio), class: "px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl text-sm transition-colors" %>
+  </div>
+<% end %>

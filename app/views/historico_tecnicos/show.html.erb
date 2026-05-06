@@ -1,0 +1,40 @@
+<% content_for :page_title, @historico.titulo %>
+<div class="mb-6">
+  <%= link_to "← #{@historico.condominio.nome}", @historico.condominio, class: "text-sm text-zinc-500 hover:text-zinc-300" %>
+</div>
+
+<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+  <div class="flex items-start justify-between flex-wrap gap-4 mb-6">
+    <div>
+      <div class="flex items-center gap-2 mb-2">
+        <%= tipo_badge(@historico.tipo) %>
+        <%= status_badge(@historico.status) %>
+      </div>
+      <h1 class="text-xl font-bold text-zinc-100"><%= @historico.titulo %></h1>
+      <p class="text-sm text-zinc-500 mt-1"><%= @historico.condominio.nome %> &mdash; <%= @historico.data_atendimento.strftime("%d/%m/%Y %H:%M") %></p>
+      <p class="text-xs text-zinc-600">Técnico: <%= @historico.user.nome %></p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "Editar", edit_historico_tecnico_path(@historico), class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold rounded-lg text-sm" %>
+    </div>
+  </div>
+
+  <div class="space-y-4 border-t border-zinc-800 pt-6">
+    <div>
+      <p class="text-xs text-zinc-600 uppercase tracking-wider mb-2">Descrição</p>
+      <p class="text-sm text-zinc-300 whitespace-pre-line"><%= @historico.descricao %></p>
+    </div>
+    <% if @historico.pecas_utilizadas.present? %>
+      <div>
+        <p class="text-xs text-zinc-600 uppercase tracking-wider mb-2">Peças Utilizadas</p>
+        <p class="text-sm text-zinc-300"><%= @historico.pecas_utilizadas %></p>
+      </div>
+    <% end %>
+    <% if @historico.equipamento.present? %>
+      <div>
+        <p class="text-xs text-zinc-600 uppercase tracking-wider mb-2">Equipamento</p>
+        <p class="text-sm text-zinc-300"><%= @historico.equipamento.nome %> (<%= @historico.equipamento.categoria %>)</p>
+      </div>
+    <% end %>
+  </div>
+</div>

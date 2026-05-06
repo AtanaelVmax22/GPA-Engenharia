@@ -1,0 +1,106 @@
+<% content_for :page_title, @condominio.nome %>
+
+<div class="mb-6 flex items-center gap-4">
+  <%= link_to "← Condomínios", condominios_path, class: "text-sm text-zinc-500 hover:text-zinc-300" %>
+</div>
+
+<!-- Header card -->
+<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+  <div class="flex items-start justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-2xl">⌂</div>
+      <div>
+        <h1 class="text-xl font-bold text-zinc-100"><%= @condominio.nome %></h1>
+        <p class="text-zinc-500 text-sm"><%= @condominio.endereco_completo %></p>
+        <div class="mt-1"><%= status_badge(@condominio.status) %></div>
+      </div>
+    </div>
+    <div class="flex gap-2 flex-wrap">
+      <%= link_to "+ Equipamento", new_condominio_equipamento_path(@condominio), class: "px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs transition-colors" %>
+      <%= link_to "+ Histórico", new_condominio_historico_tecnico_path(@condominio), class: "px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs transition-colors" %>
+      <%= link_to "+ Checklist", new_condominio_checklist_path(@condominio), class: "px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs transition-colors" %>
+      <%= link_to "Editar", edit_condominio_path(@condominio), class: "px-3 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold rounded-lg text-xs transition-colors" %>
+    </div>
+  </div>
+
+  <!-- Info grid -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-zinc-800">
+    <div>
+      <p class="text-xs text-zinc-600">Síndico</p>
+      <p class="text-sm text-zinc-300"><%= @condominio.sindico_nome.presence || "—" %></p>
+    </div>
+    <div>
+      <p class="text-xs text-zinc-600">Telefone</p>
+      <p class="text-sm text-zinc-300"><%= @condominio.sindico_telefone.presence || "—" %></p>
+    </div>
+    <div>
+      <p class="text-xs text-zinc-600">E-mail</p>
+      <p class="text-sm text-zinc-300 truncate"><%= @condominio.sindico_email.presence || "—" %></p>
+    </div>
+    <div>
+      <p class="text-xs text-zinc-600">Unidades</p>
+      <p class="text-sm text-zinc-300"><%= @condominio.unidades || "—" %></p>
+    </div>
+    <% if @condominio.observacoes.present? %>
+      <div class="col-span-2 md:col-span-4">
+        <p class="text-xs text-zinc-600">Observações</p>
+        <p class="text-sm text-zinc-400"><%= @condominio.observacoes %></p>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+  <!-- Equipamentos -->
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-semibold text-zinc-100">Equipamentos Instalados</h2>
+      <span class="text-xs text-zinc-500"><%= @equipamentos.count %> no total</span>
+    </div>
+    <% if @equipamentos.any? %>
+      <% @equipamentos.group_by(&:categoria).each do |categoria, equips| %>
+        <div class="mb-3">
+          <p class="text-xs text-zinc-600 uppercase tracking-wider mb-2"><%= categoria %></p>
+          <% equips.each do |e| %>
+            <div class="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
+              <div>
+                <p class="text-sm text-zinc-300"><%= e.nome %></p>
+                <p class="text-xs text-zinc-600"><%= e.localizacao.presence || e.modelo.presence || "—" %></p>
+              </div>
+              <div class="flex items-center gap-2">
+                <%= status_badge(e.status) %>
+                <%= link_to "ver", equipamento_path(e), class: "text-xs text-amber-400 hover:text-amber-300" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="text-sm text-zinc-600">Nenhum equipamento cadastrado.</p>
+    <% end %>
+  </div>
+
+  <!-- Histórico recente -->
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-semibold text-zinc-100">Histórico de Atendimentos</h2>
+      <%= link_to "Ver todos", condominio_historico_tecnicos_path(@condominio), class: "text-xs text-amber-400 hover:text-amber-300" %>
+    </div>
+    <% if @historicos.any? %>
+      <div class="space-y-3">
+        <% @historicos.each do |h| %>
+          <div class="flex items-start gap-3 py-2 border-b border-zinc-800 last:border-0">
+            <div class="mt-0.5"><%= tipo_badge(h.tipo) %></div>
+            <div class="flex-1 min-w-0">
+              <%= link_to h.titulo, h, class: "text-sm text-zinc-300 hover:text-amber-400 block truncate" %>
+              <p class="text-xs text-zinc-600"><%= h.user.nome %> &mdash; <%= h.data_atendimento.strftime("%d/%m/%Y") %></p>
+            </div>
+            <%= status_badge(h.status) %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-zinc-600">Nenhum registro técnico.</p>
+    <% end %>
+  </div>
+</div>

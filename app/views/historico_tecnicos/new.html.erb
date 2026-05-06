@@ -1,0 +1,3 @@
+<% content_for :page_title, "Novo Registro Técnico" %>
+<%= link_to "← #{@condominio.nome}", @condominio, class: "text-sm text-zinc-500 hover:text-zinc-300 block mb-6" %>
+<%= render "form", historico: @historico %>

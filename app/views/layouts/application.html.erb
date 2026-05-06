@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <title><%= content_for(:title) || "GPA Engenharia - Portal Técnico" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-zinc-950 text-zinc-100 min-h-screen">
+    <% if user_signed_in? %>
+      <!-- Sidebar -->
+      <div class="flex h-screen overflow-hidden">
+        <aside class="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col fixed h-full z-30">
+          <!-- Logo -->
+          <div class="flex items-center gap-3 px-6 py-5 border-b border-zinc-800">
+            <div class="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center font-black text-zinc-900 text-sm">GPA</div>
+            <div>
+              <div class="font-bold text-amber-400 text-sm leading-tight">GPA Engenharia</div>
+              <div class="text-zinc-500 text-xs">Portal Técnico</div>
+            </div>
+          </div>
+
+          <!-- Nav -->
+          <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            <%= nav_link "Dashboard", dashboard_path, icon: "⊞" %>
+            <%= nav_link "Condomínios", condominios_path, icon: "⌂" %>
+            <%= nav_link "Feed Técnico", post_tecnicos_path, icon: "◈" %>
+            <% if current_user.admin? %>
+              <div class="pt-3 pb-1 px-3 text-xs text-zinc-600 uppercase tracking-wider">Administração</div>
+              <%= nav_link "Usuários", admin_users_path, icon: "◎" %>
+            <% end %>
+          </nav>
+
+          <!-- User info -->
+          <div class="border-t border-zinc-800 px-4 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-zinc-900 font-bold text-xs">
+                <%= current_user.nome.first.upcase %>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-medium truncate"><%= current_user.nome %></div>
+                <div class="text-xs text-zinc-500 capitalize"><%= current_user.role %></div>
+              </div>
+              <%= link_to destroy_user_session_path, method: :delete, data: { turbo_method: :delete }, class: "text-zinc-500 hover:text-red-400 text-xs" do %>&#x2715;<% end %>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main content -->
+        <div class="flex-1 ml-64 flex flex-col min-h-screen">
+          <!-- Top bar -->
+          <header class="bg-zinc-900 border-b border-zinc-800 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+            <h1 class="text-lg font-semibold text-zinc-100"><%= content_for(:page_title) { "Dashboard" } %></h1>
+            <div class="flex items-center gap-4">
+              <span class="text-xs text-zinc-500"><%= l(Date.today, format: :long) rescue Date.today.strftime("%d de %B de %Y") %></span>
+            </div>
+          </header>
+
+          <!-- Flash messages -->
+          <% if notice %>
+            <div class="mx-6 mt-4 px-4 py-3 bg-emerald-900/50 border border-emerald-700 text-emerald-300 rounded-lg text-sm">
+              <%= notice %>
+            </div>
+          <% end %>
+          <% if alert %>
+            <div class="mx-6 mt-4 px-4 py-3 bg-red-900/50 border border-red-700 text-red-300 rounded-lg text-sm">
+              <%= alert %>
+            </div>
+          <% end %>
+
+          <main class="flex-1 p-6">
+            <%= yield %>
+          </main>
+
+          <footer class="border-t border-zinc-800 px-6 py-3 text-center text-xs text-zinc-600">
+            &copy; <%= Date.today.year %> GPA Engenharia. Todos os direitos reservados. &nbsp;|&nbsp; Versão 1.0.0
+          </footer>
+        </div>
+      </div>
+    <% else %>
+      <!-- Auth layout -->
+      <main class="min-h-screen flex items-center justify-center bg-zinc-950">
+        <%= yield %>
+      </main>
+    <% end %>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+<% content_for :page_title, @equipamento.nome %>
+<div class="mb-6 flex items-center gap-4">
+  <%= link_to "← #{@condominio.nome}", @condominio, class: "text-sm text-zinc-500 hover:text-zinc-300" %>
+</div>
+<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
+  <div class="flex items-start justify-between flex-wrap gap-4 mb-6">
+    <div>
+      <div class="flex items-center gap-2 mb-2"><%= status_badge(@equipamento.status) %></div>
+      <h1 class="text-xl font-bold text-zinc-100"><%= @equipamento.nome %></h1>
+      <p class="text-sm text-zinc-500"><%= @equipamento.categoria %> &mdash; <%= @condominio.nome %></p>
+    </div>
+    <%= link_to "Editar", edit_equipamento_path(@equipamento), class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold rounded-lg text-sm" %>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-zinc-800 pt-4">
+    <div><p class="text-xs text-zinc-600">Marca</p><p class="text-sm text-zinc-300"><%= @equipamento.marca.presence || "—" %></p></div>
+    <div><p class="text-xs text-zinc-600">Modelo</p><p class="text-sm text-zinc-300"><%= @equipamento.modelo.presence || "—" %></p></div>
+    <div><p class="text-xs text-zinc-600">Nº Série</p><p class="text-sm text-zinc-300"><%= @equipamento.numero_serie.presence || "—" %></p></div>
+    <div><p class="text-xs text-zinc-600">Instalação</p><p class="text-sm text-zinc-300"><%= @equipamento.data_instalacao&.strftime("%d/%m/%Y") || "—" %></p></div>
+    <% if @equipamento.localizacao.present? %>
+      <div class="col-span-2"><p class="text-xs text-zinc-600">Localização</p><p class="text-sm text-zinc-300"><%= @equipamento.localizacao %></p></div>
+    <% end %>
+  </div>
+</div>
+<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+  <h2 class="font-semibold text-zinc-100 mb-4">Histórico de Manutenção</h2>
+  <% @historicos.each do |h| %>
+    <div class="flex items-start gap-3 py-3 border-b border-zinc-800 last:border-0">
+      <%= tipo_badge(h.tipo) %>
+      <div class="flex-1">
+        <%= link_to h.titulo, h, class: "text-sm text-zinc-300 hover:text-amber-400" %>
+        <p class="text-xs text-zinc-600"><%= h.user.nome %> &mdash; <%= h.data_atendimento.strftime("%d/%m/%Y") %></p>
+      </div>
+      <%= status_badge(h.status) %>
+    </div>
+  <% end %>
+  <% if @historicos.empty? %>
+    <p class="text-sm text-zinc-600">Nenhum histórico de manutenção.</p>
+  <% end %>
+</div>

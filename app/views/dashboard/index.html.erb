@@ -1,0 +1,64 @@
+<% content_for :page_title, "Dashboard Executivo" %>
+
+<!-- Stats cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+  <%= render "dashboard/stat_card", label: "Condomínios", value: @total_condominios, sub: "Cadastro ativo", icon: "⌂", color: "amber" %>
+  <%= render "dashboard/stat_card", label: "Equipamentos", value: @total_equipamentos, sub: "Instalados", icon: "⚙", color: "blue" %>
+  <%= render "dashboard/stat_card", label: "Ordens Técnicas", value: @ordens_mes, sub: "Últimos 30 dias", icon: "✓", color: "emerald" %>
+  <%= render "dashboard/stat_card", label: "Pendências", value: @pendencias, sub: "Em andamento", icon: "⏱", color: "red" %>
+</div>
+
+<!-- Charts and recent activity -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+  <!-- Chart -->
+  <div class="xl:col-span-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+    <h2 class="text-base font-semibold text-zinc-100 mb-4">Ordens Técnicas &mdash; Últimos 6 Meses</h2>
+    <div class="h-48 flex items-end gap-2">
+      <% months = @ordens_por_mes || {} %>
+      <% max_val = [months.values.max.to_i, 1].max %>
+      <% 6.downto(1).each do |n| %>
+        <% month = n.months.ago.strftime("%b/%y") %>
+        <% val = months[n.months.ago.beginning_of_month] || 0 %>
+        <% height = (val.to_f / max_val * 100).round %>
+        <div class="flex-1 flex flex-col items-center gap-1">
+          <span class="text-xs text-zinc-500"><%= val %></span>
+          <div class="w-full bg-amber-500 rounded-t opacity-80 hover:opacity-100 transition-opacity" style="height: <%= [height, 4].max %>%"></div>
+          <span class="text-xs text-zinc-500"><%= month %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Recent activity -->
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+    <h2 class="text-base font-semibold text-zinc-100 mb-4">Atividades Recentes</h2>
+    <div class="space-y-3">
+      <% @historicos_recentes.each do |h| %>
+        <div class="flex items-start gap-3">
+          <div class="w-2 h-2 rounded-full bg-amber-400 mt-1.5 flex-shrink-0"></div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-zinc-300 truncate"><%= h.titulo %></p>
+            <p class="text-xs text-zinc-500"><%= h.condominio.nome %> &mdash; <%= time_ago_in_words(h.created_at) %> atrás</p>
+          </div>
+        </div>
+      <% end %>
+      <% if @historicos_recentes.empty? %>
+        <p class="text-sm text-zinc-600">Nenhuma atividade recente.</p>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Quick access -->
+<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+  <h2 class="text-base font-semibold text-zinc-100 mb-4">Acesso Rápido</h2>
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <%= render "dashboard/quick_link", label: "Cadastro de Condomínios", path: condominios_path, icon: "⌂" %>
+    <%= render "dashboard/quick_link", label: "Novo Condomínio", path: new_condominio_path, icon: "+" %>
+    <%= render "dashboard/quick_link", label: "Feed Técnico", path: post_tecnicos_path, icon: "◈" %>
+    <%= render "dashboard/quick_link", label: "Novo Post", path: new_post_tecnico_path, icon: "✎" %>
+    <% if current_user.admin? %>
+      <%= render "dashboard/quick_link", label: "Gestão de Usuários", path: admin_users_path, icon: "◎" %>
+    <% end %>
+  </div>
+</div>
