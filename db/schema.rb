@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_06_023156) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_06_024702) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -135,7 +135,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_06_023156) do
 
   create_table "post_tecnicos", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.bigint "condominio_id", null: false
+    t.bigint "condominio_id"
     t.string "titulo"
     t.text "conteudo"
     t.boolean "publico"

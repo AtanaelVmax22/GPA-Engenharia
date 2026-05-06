@@ -22,19 +22,35 @@
       <span class="text-xs text-zinc-600"><%= @post.created_at.strftime("%d/%m/%Y %H:%M") %></span>
     </div>
 
-    <!-- Fotos -->
-    <% if @post.fotos.attached? %>
-      <% fotos = @post.fotos.to_a %>
-      <% if fotos.size == 1 %>
-        <%= image_tag fotos.first, class: "w-full aspect-square object-cover" %>
+    <!-- Mídias -->
+    <% midias = @post.midias.to_a %>
+    <% unless midias.empty? %>
+      <% if midias.size == 1 %>
+        <% m = midias.first %>
+        <% if m.video? %>
+          <video controls class="w-full aspect-video object-cover bg-black">
+            <%= source_tag rails_blob_url(m), type: m.content_type %>
+          </video>
+        <% else %>
+          <%= image_tag m, class: "w-full aspect-square object-cover" %>
+        <% end %>
       <% else %>
         <div class="grid grid-cols-2 gap-0.5">
-          <% fotos.each_with_index do |foto, i| %>
-            <div class="relative">
-              <%= image_tag foto, class: "w-full aspect-square object-cover" %>
-              <% if i == 3 && fotos.size > 4 %>
+          <% midias.first(4).each_with_index do |m, i| %>
+            <div class="relative aspect-square overflow-hidden bg-zinc-800">
+              <% if m.video? %>
+                <video muted playsinline class="w-full h-full object-cover">
+                  <%= source_tag rails_blob_url(m), type: m.content_type %>
+                </video>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span class="text-white text-3xl drop-shadow">▶</span>
+                </div>
+              <% else %>
+                <%= image_tag m, class: "w-full h-full object-cover" %>
+              <% end %>
+              <% if i == 3 && midias.size > 4 %>
                 <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
-                  <span class="text-white text-2xl font-bold">+<%= fotos.size - 4 %></span>
+                  <span class="text-white text-2xl font-bold">+<%= midias.size - 4 %></span>
                 </div>
               <% end %>
             </div>

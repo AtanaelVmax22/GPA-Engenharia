@@ -50,7 +50,7 @@
         </aside>
 
         <!-- Main content -->
-        <div class="flex-1 ml-64 flex flex-col min-h-screen">
+        <div class="flex-1 ml-64 flex flex-col h-screen overflow-hidden">
           <!-- Top bar -->
           <header class="bg-zinc-900 border-b border-zinc-800 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
             <h1 class="text-lg font-semibold text-zinc-100"><%= content_for(:page_title) { "Dashboard" } %></h1>
@@ -71,7 +71,7 @@
             </div>
           <% end %>
 
-          <main class="flex-1 p-6">
+          <main class="flex-1 p-6 overflow-y-auto">
             <%= yield %>
           </main>
 

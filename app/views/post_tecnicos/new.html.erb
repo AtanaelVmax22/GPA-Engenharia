@@ -44,27 +44,27 @@
             class: "w-full bg-transparent text-zinc-300 text-sm outline-none border-0 focus:outline-none" %>
       </div>
 
-      <!-- Preview das fotos selecionadas -->
+      <!-- Preview das mídias selecionadas -->
       <div id="preview-container" class="hidden border-b border-zinc-800">
         <div id="preview-grid" class="grid grid-cols-3 gap-0.5 max-h-64 overflow-hidden"></div>
-        <label for="fotos-input" class="flex items-center justify-center gap-2 py-2 text-xs text-zinc-500 hover:text-amber-400 cursor-pointer transition-colors">
-          + Adicionar mais fotos
+        <label for="midias-input" class="flex items-center justify-center gap-2 py-2 text-xs text-zinc-500 hover:text-amber-400 cursor-pointer transition-colors">
+          + Adicionar mais mídias
         </label>
       </div>
 
       <!-- Botões de mídia -->
       <div class="px-4 py-3 flex gap-3">
-        <label for="fotos-input" class="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 rounded-xl text-sm text-zinc-300 cursor-pointer transition-colors flex-1 justify-center select-none">
+        <label for="midias-input" class="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 rounded-xl text-sm text-zinc-300 cursor-pointer transition-colors flex-1 justify-center select-none">
           <span class="text-base">📷</span>
-          <span>Tirar Foto</span>
+          <span>Foto/Vídeo</span>
         </label>
-        <label for="fotos-input" class="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 rounded-xl text-sm text-zinc-300 cursor-pointer transition-colors flex-1 justify-center select-none">
+        <label for="midias-input" class="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-600 rounded-xl text-sm text-zinc-300 cursor-pointer transition-colors flex-1 justify-center select-none">
           <span class="text-base">🖼</span>
           <span>Galeria</span>
         </label>
-        <%= f.file_field :fotos, multiple: true, accept: "image/*",
-            id: "fotos-input", class: "hidden",
-            onchange: "previewFotos(this)" %>
+        <%= f.file_field :midias, multiple: true, accept: "image/*,video/*",
+            id: "midias-input", class: "hidden",
+            onchange: "previewMidias(this)" %>
       </div>
 
       <!-- Botão publicar -->
@@ -78,7 +78,7 @@
 </div>
 
 <script>
-function previewFotos(input) {
+function previewMidias(input) {
   const container = document.getElementById('preview-container');
   const grid = document.getElementById('preview-grid');
 
@@ -91,11 +91,24 @@ function previewFotos(input) {
       const reader = new FileReader();
       reader.onload = (e) => {
         const div = document.createElement('div');
-        div.className = 'aspect-square overflow-hidden relative';
-        const img = document.createElement('img');
-        img.src = e.target.result;
-        img.className = 'w-full h-full object-cover';
-        div.appendChild(img);
+        div.className = 'aspect-square overflow-hidden relative bg-zinc-800';
+        if (file.type.startsWith('video/')) {
+          const video = document.createElement('video');
+          video.src = e.target.result;
+          video.className = 'w-full h-full object-cover';
+          video.muted = true;
+          video.playsInline = true;
+          const badge = document.createElement('div');
+          badge.className = 'absolute bottom-1 right-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded';
+          badge.textContent = '▶';
+          div.appendChild(video);
+          div.appendChild(badge);
+        } else {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = 'w-full h-full object-cover';
+          div.appendChild(img);
+        }
         grid.appendChild(div);
       };
       reader.readAsDataURL(file);

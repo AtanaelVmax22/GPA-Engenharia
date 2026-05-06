@@ -4,7 +4,7 @@ class PostTecnico < ApplicationRecord
 
   has_many :comentarios, dependent: :destroy
   has_many :curtidas, dependent: :destroy
-  has_many_attached :fotos
+  has_many_attached :midias
 
   validates :conteudo, presence: true
 
@@ -12,5 +12,13 @@ class PostTecnico < ApplicationRecord
 
   def curtido_por?(user)
     curtidas.exists?(user: user)
+  end
+
+  def fotos
+    midias.select { |m| m.content_type.start_with?("image/") }
+  end
+
+  def videos
+    midias.select { |m| m.content_type.start_with?("video/") }
   end
 end

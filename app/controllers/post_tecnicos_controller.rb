@@ -38,6 +38,9 @@ class PostTecnicosController < ApplicationController
   end
 
   def post_params
-    params.require(:post_tecnico).permit(:titulo, :conteudo, :condominio_id, fotos: [])
+    p = params.require(:post_tecnico).permit(:titulo, :conteudo, :condominio_id, midias: [])
+    p[:condominio_id] = nil if p[:condominio_id].blank?
+    p[:midias]&.reject!(&:blank?)
+    p
   end
 end
