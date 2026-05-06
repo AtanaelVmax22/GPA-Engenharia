@@ -58,7 +58,9 @@
 
           <!-- Vídeos -->
           <% videos.each do |video| %>
-            <video controls class="w-full max-h-96 bg-black object-contain" preload="metadata">
+            <video controls muted playsinline preload="metadata"
+                   data-feed-video
+                   class="w-full max-h-96 bg-black object-contain">
               <source src="<%= url_for(video) %>" type="<%= video.content_type %>">
             </video>
           <% end %>
@@ -159,3 +161,61 @@
 
   <%== pagy_nav(@pagy) if @pagy.pages > 1 rescue nil %>
 </div>
+
+<script>
+(function () {
+  // Tracks which video is currently playing (at most one at a time)
+  let currentPlaying = null;
+
+  // Ratio of video height that must be inside the viewport to trigger play
+  const THRESHOLD = 0.6;
+
+  // Map each video to its latest intersection ratio
+  const ratioMap = new WeakMap();
+
+  function pickBestVideo() {
+    let bestVideo = null;
+    let bestRatio = 0;
+
+    document.querySelectorAll('[data-feed-video]').forEach(v => {
+      const r = ratioMap.get(v) || 0;
+      if (r > bestRatio) {
+        bestRatio = r;
+        bestVideo = v;
+      }
+    });
+
+    if (bestRatio >= THRESHOLD) {
+      if (currentPlaying && currentPlaying !== bestVideo) {
+        currentPlaying.pause();
+      }
+      if (bestVideo && bestVideo !== currentPlaying) {
+        bestVideo.play().catch(() => {});
+        currentPlaying = bestVideo;
+      }
+    } else {
+      if (currentPlaying) {
+        currentPlaying.pause();
+        currentPlaying = null;
+      }
+    }
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      ratioMap.set(entry.target, entry.intersectionRatio);
+    });
+    pickBestVideo();
+  }, {
+    threshold: Array.from({ length: 21 }, (_, i) => i / 20) // 0, 0.05, 0.10 … 1.0
+  });
+
+  function observeVideos() {
+    document.querySelectorAll('[data-feed-video]').forEach(v => observer.observe(v));
+  }
+
+  // Observe on load and after Turbo navigations
+  document.addEventListener('turbo:load', observeVideos);
+  document.addEventListener('DOMContentLoaded', observeVideos);
+})();
+</script>

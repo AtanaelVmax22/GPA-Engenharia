@@ -2,7 +2,7 @@ class PostTecnicosController < ApplicationController
   before_action :set_post, only: [:show, :destroy]
 
   def index
-    @posts = PostTecnico.includes(:user, :condominio, :comentarios, :curtidas, fotos_attachments: :blob).recentes
+    @posts = PostTecnico.includes(:user, :condominio, :comentarios, :curtidas, midias_attachments: :blob).recentes
     @posts = @posts.where("titulo ILIKE ? OR conteudo ILIKE ?", "%#{params[:q]}%", "%#{params[:q]}%") if params[:q].present?
     @pagy, @posts = pagy(@posts, limit: 10)
   end
