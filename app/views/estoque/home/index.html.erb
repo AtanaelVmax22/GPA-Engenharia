@@ -1,0 +1,87 @@
+<% content_for :page_title do %>
+  Estoque
+<% end %>
+
+<div class="space-y-6">
+  <div>
+    <h2 class="text-2xl font-bold text-zinc-100">Estoque</h2>
+    <p class="text-sm text-zinc-500">
+      Controle de produtos, estoques, saldos, movimentações e QR Codes.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+      <div class="text-sm text-zinc-500">Produtos</div>
+      <div class="text-3xl font-bold text-amber-400 mt-2"><%= @produtos_count %></div>
+    </div>
+
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+      <div class="text-sm text-zinc-500">Estoques</div>
+      <div class="text-3xl font-bold text-amber-400 mt-2"><%= @locais_count %></div>
+    </div>
+
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+      <div class="text-sm text-zinc-500">Saldos ativos</div>
+      <div class="text-3xl font-bold text-amber-400 mt-2"><%= @saldos_count %></div>
+    </div>
+
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+      <div class="text-sm text-zinc-500">QR Code</div>
+      <div class="text-sm text-zinc-300 mt-3">Produtos e estoques identificáveis por QR.</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <%= link_to estoque_scanner_path, class: "bg-zinc-900 border border-zinc-800 rounded-xl p-5 hover:border-amber-500 transition" do %>
+      <div class="text-lg font-bold text-zinc-100">Escanear QR</div>
+      <div class="text-sm text-zinc-500 mt-2">Identificar estoque ou produto pelo QR Code.</div>
+    <% end %>
+
+    <%= link_to estoque_locais_path, class: "bg-zinc-900 border border-zinc-800 rounded-xl p-5 hover:border-amber-500 transition" do %>
+      <div class="text-lg font-bold text-zinc-100">Selecionar estoque</div>
+      <div class="text-sm text-zinc-500 mt-2">Abrir manualmente um estoque/local.</div>
+    <% end %>
+
+    <%= link_to new_estoque_movimentacao_path, class: "bg-zinc-900 border border-zinc-800 rounded-xl p-5 hover:border-amber-500 transition" do %>
+      <div class="text-lg font-bold text-zinc-100">Nova movimentação</div>
+      <div class="text-sm text-zinc-500 mt-2">Entrada, saída, devolução ou transferência.</div>
+    <% end %>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <%= link_to "Produtos", estoque_produtos_path, class: "px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-amber-500 text-center" %>
+    <%= link_to "Estoques", estoque_locais_path, class: "px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-amber-500 text-center" %>
+    <%= link_to "Saldos", estoque_saldos_path, class: "px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-amber-500 text-center" %>
+    <%= link_to "Movimentações", estoque_movimentacoes_path, class: "px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-amber-500 text-center" %>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+    <div class="px-5 py-4 border-b border-zinc-800">
+      <h3 class="font-bold text-zinc-100">Últimas movimentações</h3>
+    </div>
+
+    <div class="divide-y divide-zinc-800">
+      <% @ultimas_movimentacoes.each do |mov| %>
+        <div class="px-5 py-3 text-sm flex items-center justify-between">
+          <div>
+            <div class="text-zinc-100 font-medium"><%= mov.produto.nome %></div>
+            <div class="text-zinc-500">
+              <%= mov.tipo.humanize %> · <%= formatar_quantidade(mov.quantidade) %> · <%= mov.user.nome.presence || mov.user.email %>
+            </div>
+          </div>
+
+          <div class="text-xs text-zinc-500">
+            <%= mov.created_at.strftime("%d/%m/%Y %H:%M") %>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @ultimas_movimentacoes.empty? %>
+        <div class="px-5 py-6 text-center text-zinc-500 text-sm">
+          Nenhuma movimentação registrada ainda.
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

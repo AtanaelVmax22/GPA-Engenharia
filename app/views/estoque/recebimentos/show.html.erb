@@ -1,0 +1,225 @@
+<% content_for :page_title do %>
+  Conferir Transferência
+<% end %>
+
+<div class="max-w-3xl mx-auto space-y-6">
+  <div>
+    <h2 class="text-2xl font-bold text-zinc-100">Conferir transferência</h2>
+    <p class="text-sm text-zinc-500">
+      Confirme o recebimento somente após conferir o produto e validar o QR Code ou justificar recebimento manual.
+    </p>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-5">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+      <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+        <div class="text-zinc-500">Produto</div>
+        <div class="text-zinc-100 font-semibold mt-1">
+          <%= @movimentacao.produto.nome %>
+        </div>
+      </div>
+
+      <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+        <div class="text-zinc-500">Quantidade enviada</div>
+        <div class="text-amber-400 font-bold mt-1">
+          <%= formatar_quantidade(@movimentacao.quantidade) %>
+        </div>
+      </div>
+
+      <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+        <div class="text-zinc-500">Origem</div>
+        <div class="text-zinc-100 font-semibold mt-1">
+          <%= @movimentacao.origem_local&.nome || "-" %>
+        </div>
+      </div>
+
+      <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+        <div class="text-zinc-500">Destino</div>
+        <div class="text-zinc-100 font-semibold mt-1">
+          <%= @movimentacao.destino_local&.nome || "-" %>
+        </div>
+      </div>
+
+      <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+        <div class="text-zinc-500">Enviado por</div>
+        <div class="text-zinc-100 font-semibold mt-1">
+          <%= @movimentacao.user.nome.presence || @movimentacao.user.email %>
+        </div>
+      </div>
+
+      <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+        <div class="text-zinc-500">Data de envio</div>
+        <div class="text-zinc-100 font-semibold mt-1">
+          <%= @movimentacao.created_at.strftime("%d/%m/%Y %H:%M") %>
+        </div>
+      </div>
+    </div>
+
+    <% if @movimentacao.observacao.present? %>
+      <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-sm">
+        <div class="text-zinc-500">Motivo / observação do envio</div>
+        <div class="text-zinc-300 mt-1">
+          <%= @movimentacao.observacao %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if @movimentacao.pendente? %>
+      <div class="bg-amber-950/40 border border-amber-800 rounded-xl p-4 text-sm text-amber-200">
+        Para receber esta transferência, leia ou cole o QR Code do produto enviado.
+        Se o produto não tiver QR ou a etiqueta estiver ilegível, marque recebimento manual e justifique.
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+          <h3 class="text-zinc-100 font-bold mb-4">Confirmar recebimento</h3>
+
+          <%= form_with url: confirmar_estoque_recebimento_path(@movimentacao), method: :patch, class: "space-y-4" do |form| %>
+            <div>
+              <%= form.label :qr_token_produto, "QR Code do produto recebido", class: "block text-sm text-zinc-300 mb-1" %>
+
+              <div class="flex gap-2">
+                <%= form.text_field :qr_token_produto,
+                  id: "qr_token_produto",
+                  class: "flex-1 px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
+                  placeholder: "Cole o link do QR ou o token do produto" %>
+
+                <button
+                  type="button"
+                  onclick="document.getElementById('qr_token_produto').focus()"
+                  class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-100 whitespace-nowrap"
+                >
+                  Ler QR
+                </button>
+              </div>
+
+              <p class="text-xs text-zinc-500 mt-2">
+                Use leitor de QR do celular/coletor para colar o link ou token neste campo.
+              </p>
+            </div>
+
+            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+              <label class="flex items-start gap-3 cursor-pointer">
+                <%= check_box_tag :recebimento_manual,
+                  "1",
+                  false,
+                  class: "mt-1 rounded border-zinc-700 bg-zinc-900 text-amber-500" %>
+
+                <div>
+                  <div class="text-sm font-semibold text-zinc-100">
+                    Receber manualmente por conferência visual
+                  </div>
+
+                  <div class="text-xs text-zinc-500 mt-1">
+                    Use somente quando o produto não tiver QR Code ou quando a etiqueta estiver ilegível.
+                    Será registrado quem recebeu, data/hora e justificativa.
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div>
+              <%= form.label :observacao_recebimento, "Observação do recebimento", class: "block text-sm text-zinc-300 mb-1" %>
+
+              <%= form.text_area :observacao_recebimento,
+                rows: 4,
+                class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
+                placeholder: "Ex: Produto conferido visualmente, modelo e quantidade compatíveis com a transferência." %>
+
+              <p class="text-xs text-zinc-500 mt-2">
+                Para recebimento manual, a observação é obrigatória.
+              </p>
+            </div>
+
+            <%= form.submit "Confirmar recebimento",
+              data: {
+                turbo_confirm: "Confirma o recebimento desta transferência? Após confirmar, o saldo entrará no estoque destino."
+              },
+              class: "w-full px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-lg cursor-pointer" %>
+          <% end %>
+        </div>
+
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+          <h3 class="text-zinc-100 font-bold mb-4">Recusar transferência</h3>
+
+          <%= form_with url: recusar_estoque_recebimento_path(@movimentacao), method: :patch, class: "space-y-4" do |form| %>
+            <div>
+              <%= form.label :observacao_recebimento, "Motivo da recusa", class: "block text-sm text-zinc-300 mb-1" %>
+
+              <%= form.text_area :observacao_recebimento,
+                rows: 10,
+                class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
+                placeholder: "Ex: Produto não chegou, QR não confere ou quantidade divergente." %>
+            </div>
+
+            <%= form.submit "Recusar transferência",
+              data: {
+                turbo_confirm: "Confirma a recusa desta transferência? O saldo voltará para o estoque de origem."
+              },
+              class: "w-full px-5 py-3 bg-red-500 hover:bg-red-400 text-white font-bold rounded-lg cursor-pointer" %>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-400">
+        Esta transferência já foi processada.
+
+        <% if @movimentacao.recebido? %>
+          <div class="mt-3 space-y-1">
+            <div class="text-emerald-400">
+              Recebida por:
+              <%= @movimentacao.recebido_por&.nome || @movimentacao.recebido_por&.email || "-" %>
+            </div>
+
+            <div>
+              Data/hora:
+              <%= @movimentacao.recebido_em&.strftime("%d/%m/%Y %H:%M") || "-" %>
+            </div>
+
+            <% if @movimentacao.qr_produto_confirmado_token.present? %>
+              <div>
+                Conferência: QR Code validado
+              </div>
+            <% else %>
+              <div class="text-amber-400">
+                Conferência: recebimento manual por identificação visual
+              </div>
+            <% end %>
+
+            <% if @movimentacao.observacao_recebimento.present? %>
+              <div class="pt-2 text-zinc-300">
+                Observação:
+                <%= @movimentacao.observacao_recebimento %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if @movimentacao.recusado? %>
+          <div class="mt-3 space-y-1">
+            <div class="text-red-400">
+              Transferência recusada.
+            </div>
+
+            <div>
+              Processado por:
+              <%= @movimentacao.recebido_por&.nome || @movimentacao.recebido_por&.email || "-" %>
+            </div>
+
+            <div>
+              Data/hora:
+              <%= @movimentacao.recebido_em&.strftime("%d/%m/%Y %H:%M") || "-" %>
+            </div>
+
+            <% if @movimentacao.observacao_recebimento.present? %>
+              <div class="pt-2 text-zinc-300">
+                Motivo:
+                <%= @movimentacao.observacao_recebimento %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
