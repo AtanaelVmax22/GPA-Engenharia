@@ -1,0 +1,73 @@
+<% content_for :page_title do %>
+  Receber Transferências
+<% end %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-zinc-100">Receber transferências</h2>
+      <p class="text-sm text-zinc-500">
+        Estoque destino: <%= @local.nome %>
+      </p>
+    </div>
+
+    <%= link_to "Voltar ao estoque",
+      estoque_local_path(@local),
+      class: "px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-100" %>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-zinc-800/70 text-zinc-400">
+        <tr>
+          <th class="px-4 py-3 text-left">Produto</th>
+          <th class="px-4 py-3 text-left">Origem</th>
+          <th class="px-4 py-3 text-right">Quantidade</th>
+          <th class="px-4 py-3 text-left">Enviado por</th>
+          <th class="px-4 py-3 text-left">Data</th>
+          <th class="px-4 py-3 text-right">Ação</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-zinc-800">
+        <% @pendentes.each do |mov| %>
+          <tr class="hover:bg-zinc-800/40">
+            <td class="px-4 py-3 text-zinc-100 font-medium">
+              <%= mov.produto.nome %>
+            </td>
+
+            <td class="px-4 py-3 text-zinc-400">
+              <%= mov.origem_local&.nome || "-" %>
+            </td>
+
+            <td class="px-4 py-3 text-right text-amber-400 font-semibold">
+              <%= formatar_quantidade(mov.quantidade) %>
+            </td>
+
+            <td class="px-4 py-3 text-zinc-400">
+              <%= mov.user.nome.presence || mov.user.email %>
+            </td>
+
+            <td class="px-4 py-3 text-zinc-400">
+              <%= mov.created_at.strftime("%d/%m/%Y %H:%M") %>
+            </td>
+
+            <td class="px-4 py-3 text-right">
+              <%= link_to "Conferir e receber",
+                estoque_recebimento_path(mov),
+                class: "text-emerald-400 hover:text-emerald-300 font-semibold" %>
+            </td>
+          </tr>
+        <% end %>
+
+        <% if @pendentes.empty? %>
+          <tr>
+            <td colspan="6" class="px-4 py-8 text-center text-zinc-500">
+              Nenhuma transferência pendente para este estoque.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

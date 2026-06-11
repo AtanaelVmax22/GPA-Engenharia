@@ -1,40 +1,85 @@
-<% content_for :page_title, "Gestão de Usuários" %>
-<div class="flex justify-end mb-6">
-  <%= link_to "+ Novo Usuário", new_user_registration_path, class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold rounded-xl text-sm" %>
-</div>
-<div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-  <table class="w-full text-sm">
-    <thead class="border-b border-zinc-800">
-      <tr class="text-xs text-zinc-500 uppercase tracking-wider">
-        <th class="text-left px-6 py-3">Nome</th>
-        <th class="text-left px-6 py-3">E-mail</th>
-        <th class="text-left px-6 py-3">Role</th>
-        <th class="text-left px-6 py-3">Telefone</th>
-        <th class="px-6 py-3"></th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @users.each do |u| %>
-        <tr class="border-b border-zinc-800 last:border-0 hover:bg-zinc-800/50">
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-zinc-900 font-bold text-xs"><%= u.nome.first.upcase %></div>
-              <span class="text-zinc-200 font-medium"><%= u.nome %></span>
-            </div>
-          </td>
-          <td class="px-6 py-4 text-zinc-400"><%= u.email %></td>
-          <td class="px-6 py-4"><%= status_badge(u.role) %></td>
-          <td class="px-6 py-4 text-zinc-400"><%= u.telefone.presence || "—" %></td>
-          <td class="px-6 py-4 text-right">
-            <%= link_to "Editar", edit_admin_user_path(u), class: "text-amber-400 hover:text-amber-300 text-xs mr-3" %>
-            <% unless u == current_user %>
-              <%= button_to "Remover", admin_user_path(u), method: :delete,
-                  data: { confirm: "Remover #{u.nome}?" },
-                  class: "text-red-500 hover:text-red-400 text-xs bg-transparent border-0 cursor-pointer" %>
-            <% end %>
-          </td>
+<% content_for :page_title do %>
+  Gerenciar Usuários
+<% end %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-zinc-100">Usuários</h2>
+      <p class="text-sm text-zinc-500">Gerencie acessos, permissões, cadastro e exclusão de usuários.</p>
+    </div>
+
+    <%= link_to "Novo usuário", new_admin_user_path,
+      class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold rounded-lg text-sm" %>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-zinc-800/70 text-zinc-400">
+        <tr>
+          <th class="px-4 py-3 text-left">Nome</th>
+          <th class="px-4 py-3 text-left">E-mail</th>
+          <th class="px-4 py-3 text-left">Telefone</th>
+          <th class="px-4 py-3 text-left">Permissão</th>
+          <th class="px-4 py-3 text-right">Ações</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+
+      <tbody class="divide-y divide-zinc-800">
+        <% @users.each do |user| %>
+          <tr class="hover:bg-zinc-800/40">
+            <td class="px-4 py-3 text-zinc-100">
+              <%= user.nome.presence || "Sem nome" %>
+
+              <% if user == current_user %>
+                <span class="ml-2 text-xs text-amber-400">(você)</span>
+              <% end %>
+            </td>
+
+            <td class="px-4 py-3 text-zinc-400">
+              <%= user.email %>
+            </td>
+
+            <td class="px-4 py-3 text-zinc-400">
+              <%= user.telefone.presence || "-" %>
+            </td>
+
+            <td class="px-4 py-3">
+              <% if user.admin? %>
+                <span class="px-2 py-1 rounded bg-amber-500/20 text-amber-300 text-xs font-semibold">
+                  Admin
+                </span>
+              <% else %>
+                <span class="px-2 py-1 rounded bg-zinc-700 text-zinc-300 text-xs font-semibold">
+                  Técnico
+                </span>
+              <% end %>
+            </td>
+
+            <td class="px-4 py-3 text-right space-x-2">
+              <%= link_to "Editar", edit_admin_user_path(user),
+                class: "text-amber-400 hover:text-amber-300" %>
+
+              <% unless user == current_user %>
+                <%= link_to "Excluir", admin_user_path(user),
+                  data: {
+                    turbo_method: :delete,
+                    turbo_confirm: "Tem certeza que deseja excluir este usuário?"
+                  },
+                  class: "text-red-400 hover:text-red-300" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+
+        <% if @users.empty? %>
+          <tr>
+            <td colspan="5" class="px-4 py-6 text-center text-zinc-500">
+              Nenhum usuário cadastrado.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 </div>

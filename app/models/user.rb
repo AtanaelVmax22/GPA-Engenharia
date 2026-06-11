@@ -10,8 +10,13 @@ class User < ApplicationRecord
   has_many :checklists, dependent: :destroy
 
   validates :nome, presence: true
+  validates :role, presence: true
 
-  def admin?
-    role == "admin"
+  before_validation :set_default_role, on: :create
+
+  private
+
+  def set_default_role
+    self.role ||= :tecnico
   end
 end

@@ -60,3 +60,5 @@ group :development do
   gem "web-console"
 end
 
+
+gem "rqrcode", "~> 3.2"

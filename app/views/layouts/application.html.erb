@@ -3,74 +3,158 @@
   <head>
     <title><%= content_for(:title) || "GPA Engenharia - Portal Técnico" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
   <body class="bg-zinc-950 text-zinc-100 min-h-screen">
     <% if user_signed_in? %>
-      <!-- Sidebar -->
-      <div class="flex h-screen overflow-hidden">
-        <aside class="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col fixed h-full z-30">
-          <!-- Logo -->
-          <div class="flex items-center gap-3 px-6 py-5 border-b border-zinc-800">
-            <div class="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center font-black text-zinc-900 text-sm">GPA</div>
-            <div>
-              <div class="font-bold text-amber-400 text-sm leading-tight">GPA Engenharia</div>
-              <div class="text-zinc-500 text-xs">Portal Técnico</div>
+      <div class="flex min-h-screen bg-zinc-950">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col fixed left-0 top-0 bottom-0 z-30">
+          
+          <!-- Logo clicável -->
+          <%= link_to dashboard_path,
+            class: "flex items-center gap-3 px-6 py-5 border-b border-zinc-800 hover:bg-zinc-800/50 transition" do %>
+            
+            <div class="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center font-black text-zinc-900 text-sm">
+              GPA
             </div>
-          </div>
 
-          <!-- Nav -->
+            <div>
+              <div class="font-bold text-amber-400 text-sm leading-tight">
+                GPA Engenharia
+              </div>
+              <div class="text-zinc-500 text-xs">
+                Portal Técnico
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Menu -->
           <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
             <%= nav_link "Dashboard", dashboard_path, icon: "⊞" %>
             <%= nav_link "Condomínios", condominios_path, icon: "⌂" %>
             <%= nav_link "Feed Técnico", post_tecnicos_path, icon: "◈" %>
+            <%= nav_link "Estoque", estoque_root_path, icon: "▣" %>
+
             <% if current_user.admin? %>
-              <div class="pt-3 pb-1 px-3 text-xs text-zinc-600 uppercase tracking-wider">Administração</div>
+              <div class="pt-3 pb-1 px-3 text-xs text-zinc-600 uppercase tracking-wider">
+                Administração
+              </div>
+
               <%= nav_link "Usuários", admin_users_path, icon: "◎" %>
             <% end %>
           </nav>
 
-          <!-- User info -->
-          <div class="border-t border-zinc-800 px-4 py-4">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-zinc-900 font-bold text-xs">
-                <%= current_user.nome.first.upcase %>
+          <!-- Usuário fixado no final da sidebar -->
+          <div class="mt-auto border-t border-zinc-800 px-4 py-4 relative">
+            <details class="relative group">
+              <summary class="list-none cursor-pointer">
+                <div class="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-zinc-800 transition">
+                  <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-zinc-900 font-bold text-sm">
+                    <%= current_user.nome.to_s.first&.upcase || "U" %>
+                  </div>
+
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-semibold text-zinc-100 truncate">
+                      <%= current_user.nome.presence || current_user.email %>
+                    </div>
+
+                    <div class="text-xs text-zinc-500 capitalize">
+                      <%= current_user.role %>
+                    </div>
+                  </div>
+
+                  <div class="text-zinc-500 group-open:rotate-180 transition">
+                    ▾
+                  </div>
+                </div>
+              </summary>
+
+              <!-- Dropdown subindo para cima -->
+              <div class="absolute left-0 right-0 bottom-full mb-2 bg-zinc-900 border border-zinc-700 rounded-xl shadow-xl overflow-hidden z-50">
+                <div class="px-4 py-3 border-b border-zinc-800">
+                  <div class="text-sm font-semibold text-zinc-100 truncate">
+                    <%= current_user.nome.presence || current_user.email %>
+                  </div>
+
+                  <div class="text-xs text-zinc-500 truncate">
+                    <%= current_user.email %>
+                  </div>
+                </div>
+
+                <div class="py-2">
+                  <% if current_user.admin? %>
+                    <%= link_to new_admin_user_path,
+                      class: "flex items-center gap-2 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-amber-400 transition" do %>
+                      <span>＋</span>
+                      <span>Novo usuário</span>
+                    <% end %>
+
+                    <%= link_to edit_admin_user_path(current_user),
+                      class: "flex items-center gap-2 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-amber-400 transition" do %>
+                      <span>✎</span>
+                      <span>Editar meu usuário</span>
+                    <% end %>
+
+                    <%= link_to admin_users_path,
+                      class: "flex items-center gap-2 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-amber-400 transition" do %>
+                      <span>◎</span>
+                      <span>Lista de usuários</span>
+                    <% end %>
+                  <% end %>
+
+                  <div class="border-t border-zinc-800 mt-2 pt-2">
+                    <%= button_to destroy_user_session_path,
+                      method: :delete,
+                      form: { data: { turbo: false }, class: "w-full" },
+                      class: "w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-950/40 hover:text-red-300 bg-transparent border-0 cursor-pointer text-left transition" do %>
+                      <span>⎋</span>
+                      <span>Sair</span>
+                    <% end %>
+                  </div>
+                </div>
               </div>
-              <div class="flex-1 min-w-0">
-                <div class="text-sm font-medium truncate"><%= current_user.nome %></div>
-                <div class="text-xs text-zinc-500 capitalize"><%= current_user.role %></div>
-              </div>
-              <%= link_to destroy_user_session_path, method: :delete, data: { turbo_method: :delete }, class: "text-zinc-500 hover:text-red-400 text-xs" do %>&#x2715;<% end %>
-            </div>
+            </details>
           </div>
         </aside>
 
-        <!-- Main content -->
-        <div class="flex-1 ml-64 flex flex-col h-screen overflow-hidden">
+        <!-- Conteúdo principal -->
+        <div class="ml-64 flex-1 min-h-screen flex flex-col bg-zinc-950">
+          
           <!-- Top bar -->
-          <header class="bg-zinc-900 border-b border-zinc-800 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
-            <h1 class="text-lg font-semibold text-zinc-100"><%= content_for(:page_title) { "Dashboard" } %></h1>
+          <header class="bg-zinc-900 border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
+            <%= link_to dashboard_path,
+              class: "text-lg font-semibold text-zinc-100 hover:text-amber-400 transition" do %>
+              <%= content_for?(:page_title) ? yield(:page_title) : "Dashboard" %>
+            <% end %>
+
             <div class="flex items-center gap-4">
-              <span class="text-xs text-zinc-500"><%= l(Date.today, format: :long) rescue Date.today.strftime("%d de %B de %Y") %></span>
+              <span class="text-xs text-zinc-500">
+                <%= l(Date.today, format: :long) rescue Date.today.strftime("%d/%m/%Y") %>
+              </span>
             </div>
           </header>
 
           <!-- Flash messages -->
-          <% if notice %>
+          <% if notice.present? %>
             <div class="mx-6 mt-4 px-4 py-3 bg-emerald-900/50 border border-emerald-700 text-emerald-300 rounded-lg text-sm">
               <%= notice %>
             </div>
           <% end %>
-          <% if alert %>
+
+          <% if alert.present? %>
             <div class="mx-6 mt-4 px-4 py-3 bg-red-900/50 border border-red-700 text-red-300 rounded-lg text-sm">
               <%= alert %>
             </div>
           <% end %>
 
+          <!-- Conteúdo das telas -->
           <main class="flex-1 p-6 overflow-y-auto">
             <%= yield %>
           </main>
@@ -81,10 +165,16 @@
         </div>
       </div>
     <% else %>
-      <!-- Auth layout -->
       <main class="min-h-screen flex items-center justify-center bg-zinc-950">
         <%= yield %>
       </main>
+    <% end %>
+
+    <% if user_signed_in? %>
+      <div
+        data-controller="notificacoes-estoque"
+        data-notificacoes-estoque-url-value="<%= estoque_notificacoes_transferencias_pendentes_path %>"
+      ></div>
     <% end %>
   </body>
 </html>

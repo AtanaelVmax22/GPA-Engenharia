@@ -1,0 +1,77 @@
+<% if pagination[:total_pages] > 1 %>
+  <div class="flex flex-col md:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-zinc-800 bg-zinc-900">
+    <div class="text-sm text-zinc-500">
+      Exibindo
+      <span class="text-zinc-300 font-semibold">
+        <%= pagination[:offset] + 1 %>
+      </span>
+      a
+      <span class="text-zinc-300 font-semibold">
+        <%= [pagination[:offset] + pagination[:per_page], pagination[:total_count]].min %>
+      </span>
+      de
+      <span class="text-zinc-300 font-semibold">
+        <%= pagination[:total_count] %>
+      </span>
+      registros
+    </div>
+
+    <div class="flex items-center gap-2">
+      <% if pagination[:current_page] > 1 %>
+        <%= link_to "Anterior",
+          url_for(pagination_link_params(pagination[:current_page] - 1)),
+          class: "px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm" %>
+      <% else %>
+        <span class="px-3 py-2 rounded-lg bg-zinc-800/50 text-zinc-600 text-sm cursor-not-allowed">
+          Anterior
+        </span>
+      <% end %>
+
+      <% start_page = [pagination[:current_page] - 2, 1].max %>
+      <% end_page = [start_page + 4, pagination[:total_pages]].min %>
+      <% start_page = [end_page - 4, 1].max %>
+
+      <% if start_page > 1 %>
+        <%= link_to "1",
+          url_for(pagination_link_params(1)),
+          class: "px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm" %>
+
+        <% if start_page > 2 %>
+          <span class="px-2 text-zinc-600">...</span>
+        <% end %>
+      <% end %>
+
+      <% (start_page..end_page).each do |page_number| %>
+        <% if page_number == pagination[:current_page] %>
+          <span class="px-3 py-2 rounded-lg bg-amber-500 text-zinc-950 font-semibold text-sm">
+            <%= page_number %>
+          </span>
+        <% else %>
+          <%= link_to page_number,
+            url_for(pagination_link_params(page_number)),
+            class: "px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm" %>
+        <% end %>
+      <% end %>
+
+      <% if end_page < pagination[:total_pages] %>
+        <% if end_page < pagination[:total_pages] - 1 %>
+          <span class="px-2 text-zinc-600">...</span>
+        <% end %>
+
+        <%= link_to pagination[:total_pages],
+          url_for(pagination_link_params(pagination[:total_pages])),
+          class: "px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm" %>
+      <% end %>
+
+      <% if pagination[:current_page] < pagination[:total_pages] %>
+        <%= link_to "Próxima",
+          url_for(pagination_link_params(pagination[:current_page] + 1)),
+          class: "px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm" %>
+      <% else %>
+        <span class="px-3 py-2 rounded-lg bg-zinc-800/50 text-zinc-600 text-sm cursor-not-allowed">
+          Próxima
+        </span>
+      <% end %>
+    </div>
+  </div>
+<% end %>
