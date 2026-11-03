@@ -1,0 +1,174 @@
+<% content_for :page_title do %>
+  Garantias
+<% end %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-zinc-100">Garantias</h2>
+      <p class="text-sm text-zinc-500">
+        Acompanhe equipamentos com garantia de loja, garantia de fábrica, nota fiscal e local atual.
+      </p>
+    </div>
+
+    <% if current_user.admin? %>
+      <%= link_to "Cadastrar item",
+        new_estoque_item_path,
+        class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-lg text-sm" %>
+    <% end %>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+    <%= link_to estoque_garantias_path(filtro: "ativas"),
+      class: "bg-zinc-900 border #{ @filtro == "ativas" ? "border-emerald-500" : "border-zinc-800" } rounded-xl p-4 hover:bg-zinc-800" do %>
+      <div class="text-zinc-500 text-xs">Ativas</div>
+      <div class="text-emerald-400 text-2xl font-bold"><%= @total_ativas %></div>
+    <% end %>
+
+    <%= link_to estoque_garantias_path(filtro: "vencendo"),
+      class: "bg-zinc-900 border #{ @filtro == "vencendo" ? "border-amber-500" : "border-zinc-800" } rounded-xl p-4 hover:bg-zinc-800" do %>
+      <div class="text-zinc-500 text-xs">Vencendo em 30 dias</div>
+      <div class="text-amber-400 text-2xl font-bold"><%= @total_vencendo %></div>
+    <% end %>
+
+    <%= link_to estoque_garantias_path(filtro: "vencidas"),
+      class: "bg-zinc-900 border #{ @filtro == "vencidas" ? "border-red-500" : "border-zinc-800" } rounded-xl p-4 hover:bg-zinc-800" do %>
+      <div class="text-zinc-500 text-xs">Vencidas</div>
+      <div class="text-red-400 text-2xl font-bold"><%= @total_vencidas %></div>
+    <% end %>
+
+    <%= link_to estoque_garantias_path(filtro: "sem_data"),
+      class: "bg-zinc-900 border #{ @filtro == "sem_data" ? "border-zinc-400" : "border-zinc-800" } rounded-xl p-4 hover:bg-zinc-800" do %>
+      <div class="text-zinc-500 text-xs">Sem data de compra</div>
+      <div class="text-zinc-300 text-2xl font-bold"><%= @total_sem_data %></div>
+    <% end %>
+
+    <%= link_to estoque_garantias_path(filtro: "instalados"),
+      class: "bg-zinc-900 border #{ @filtro == "instalados" ? "border-sky-500" : "border-zinc-800" } rounded-xl p-4 hover:bg-zinc-800" do %>
+      <div class="text-zinc-500 text-xs">Instalados</div>
+      <div class="text-sky-400 text-2xl font-bold"><%= @total_instalados %></div>
+    <% end %>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+    <%= form_with url: estoque_garantias_path, method: :get, class: "grid grid-cols-1 md:grid-cols-5 gap-3" do |form| %>
+      <%= form.hidden_field :filtro, value: @filtro %>
+
+      <div class="md:col-span-4">
+        <%= form.text_field :busca,
+          value: @busca,
+          placeholder: "Buscar por produto, patrimônio, serial, MAC, fornecedor ou nota fiscal",
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+      </div>
+
+      <div class="flex gap-2">
+        <%= form.submit "Buscar",
+          class: "px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-100 cursor-pointer" %>
+
+        <%= link_to "Limpar",
+          estoque_garantias_path(filtro: @filtro),
+          class: "px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-100" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-zinc-800/70 text-zinc-400">
+        <tr>
+          <th class="px-4 py-3 text-left">Item</th>
+          <th class="px-4 py-3 text-left">Produto</th>
+          <th class="px-4 py-3 text-left">Local</th>
+          <th class="px-4 py-3 text-left">Compra / NF</th>
+          <th class="px-4 py-3 text-left">Garantia loja</th>
+          <th class="px-4 py-3 text-left">Garantia fábrica</th>
+          <th class="px-4 py-3 text-right">Ação</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-zinc-800">
+        <% @itens.each do |item| %>
+          <tr class="hover:bg-zinc-800/40">
+            <td class="px-4 py-3">
+              <div class="text-zinc-100 font-semibold">
+                <%= item.identificacao %>
+              </div>
+
+              <div class="text-xs text-zinc-500">
+                Serial: <%= item.numero_serie.presence || "-" %>
+              </div>
+
+              <div class="text-xs text-zinc-500">
+                MAC: <%= item.mac.presence || "-" %>
+              </div>
+            </td>
+
+            <td class="px-4 py-3 text-zinc-300">
+              <%= item.produto.nome %>
+            </td>
+
+            <td class="px-4 py-3">
+              <div class="text-zinc-300">
+                <%= item.local&.nome || "-" %>
+              </div>
+
+              <div class="text-xs text-zinc-500">
+                Condomínio ID: <%= item.condominio_id.presence || "-" %>
+              </div>
+            </td>
+
+            <td class="px-4 py-3">
+              <div class="text-zinc-300">
+                <%= item.data_compra&.strftime("%d/%m/%Y") || "-" %>
+              </div>
+
+              <div class="text-xs text-zinc-500">
+                NF: <%= item.nota_fiscal_numero.presence || "-" %>
+              </div>
+
+              <div class="text-xs text-zinc-500">
+                <%= item.fornecedor_nome.presence || "-" %>
+              </div>
+            </td>
+
+            <td class="px-4 py-3">
+              <div class="<%= item.garantia_loja_ativa? ? "text-emerald-400" : "text-red-400" %> font-semibold">
+                <%= item.garantia_loja_status %>
+              </div>
+
+              <div class="text-xs text-zinc-500">
+                <%= item.garantia_loja_dias %> dias
+              </div>
+            </td>
+
+            <td class="px-4 py-3">
+              <div class="<%= item.garantia_fabrica_ativa? ? "text-emerald-400" : "text-red-400" %> font-semibold">
+                <%= item.garantia_fabrica_status %>
+              </div>
+
+              <div class="text-xs text-zinc-500">
+                <%= item.garantia_fabrica_meses %> meses
+              </div>
+            </td>
+
+            <td class="px-4 py-3 text-right">
+              <%= link_to "Ver item",
+                estoque_item_path(item),
+                class: "text-amber-400 hover:text-amber-300 font-semibold" %>
+            </td>
+          </tr>
+        <% end %>
+
+        <% if @itens.empty? %>
+          <tr>
+            <td colspan="7" class="px-4 py-8 text-center text-zinc-500">
+              Nenhum item encontrado para este filtro.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <%= render "shared/pagination", pagination: @itens_pagination %>
+  </div>
+</div>

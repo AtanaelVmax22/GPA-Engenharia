@@ -1,2 +1,24 @@
+
 <% content_for :page_title, "Novo Condomínio" %>
-<%= render "form", condominio: @condominio %>
+
+<div class="gpa-module gpa-form-page">
+
+  <%= link_to condominios_path,
+    class: "gpa-back-link" do %>
+    <span>←</span>
+    Voltar para Condomínios
+  <% end %>
+
+  <div class="gpa-module-header">
+    <div class="gpa-module-heading">
+      <h2>Cadastrar Condomínio</h2>
+      <p>
+        Preencha as informações para adicionar
+        um novo condomínio ao sistema.
+      </p>
+    </div>
+  </div>
+
+  <%= render "form", condominio: @condominio %>
+
+</div>

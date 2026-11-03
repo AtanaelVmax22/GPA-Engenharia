@@ -1,3 +1,31 @@
+
 <% content_for :page_title, "Novo Registro Técnico" %>
-<%= link_to "← #{@condominio.nome}", @condominio, class: "text-sm text-zinc-500 hover:text-zinc-300 block mb-6" %>
-<%= render "form", historico: @historico %>
+
+<div class="gpa-module gpa-form-page">
+
+  <%= link_to condominio_historico_tecnicos_path(@condominio),
+    class: "gpa-back-link" do %>
+
+    <span>←</span>
+    <span>Voltar ao Histórico Técnico</span>
+
+  <% end %>
+
+  <div class="gpa-module-header">
+
+    <div class="gpa-module-heading">
+
+      <h2>Novo Atendimento Técnico</h2>
+
+      <p>
+        Registre o serviço realizado no condomínio
+        <strong><%= @condominio.nome %></strong>.
+      </p>
+
+    </div>
+
+  </div>
+
+  <%= render "form", historico: @historico %>
+
+</div>

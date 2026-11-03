@@ -1,180 +1,415 @@
+
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
   <head>
     <title><%= content_for(:title) || "GPA Engenharia - Portal Técnico" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b1b35">
 
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+
+    <!-- Aplicar tema antes de renderizar a página -->
+    <script>
+      (() => {
+        try {
+          const saved = localStorage.getItem("gpa-theme");
+          const systemLight = window.matchMedia(
+            "(prefers-color-scheme: light)"
+          ).matches;
+
+          document.documentElement.dataset.theme =
+            saved === "light" || saved === "dark"
+              ? saved
+              : (systemLight ? "light" : "dark");
+        } catch (_) {}
+      })();
+    </script>
 
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="bg-zinc-950 text-zinc-100 min-h-screen">
+  <body class="gpa-body">
     <% if user_signed_in? %>
-      <div class="flex min-h-screen bg-zinc-950">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col fixed left-0 top-0 bottom-0 z-30">
-          
-          <!-- Logo clicável -->
-          <%= link_to dashboard_path,
-            class: "flex items-center gap-3 px-6 py-5 border-b border-zinc-800 hover:bg-zinc-800/50 transition" do %>
-            
-            <div class="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center font-black text-zinc-900 text-sm">
-              GPA
-            </div>
 
-            <div>
-              <div class="font-bold text-amber-400 text-sm leading-tight">
-                GPA Engenharia
-              </div>
-              <div class="text-zinc-500 text-xs">
-                Portal Técnico
-              </div>
-            </div>
-          <% end %>
+      <div
+        class="gpa-shell"
+        data-controller="gpa-shell"
+        data-action="keydown.esc@window->gpa-shell#closeMenu"
+      >
 
-          <!-- Menu -->
-          <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-            <%= nav_link "Dashboard", dashboard_path, icon: "⊞" %>
-            <%= nav_link "Condomínios", condominios_path, icon: "⌂" %>
-            <%= nav_link "Feed Técnico", post_tecnicos_path, icon: "◈" %>
-            <%= nav_link "Estoque", estoque_root_path, icon: "▣" %>
+        <!-- Overlay do menu mobile -->
+        <button
+          type="button"
+          class="gpa-backdrop"
+          aria-label="Fechar menu"
+          data-gpa-shell-target="backdrop"
+          data-action="click->gpa-shell#closeMenu"
+          hidden
+        ></button>
 
-            <% if current_user.admin? %>
-              <div class="pt-3 pb-1 px-3 text-xs text-zinc-600 uppercase tracking-wider">
-                Administração
-              </div>
+        <!-- ===================================
+             SIDEBAR
+             =================================== -->
+        <aside
+          id="gpa-sidebar"
+          class="gpa-sidebar"
+          aria-label="Navegação principal"
+          data-gpa-shell-target="sidebar"
+        >
 
-              <%= nav_link "Usuários", admin_users_path, icon: "◎" %>
+          <!-- Logo e identificação -->
+          <div class="gpa-brand-bar">
+
+            <%= link_to dashboard_path,
+              class: "gpa-brand",
+              data: { action: "click->gpa-shell#navigate" } do %>
+
+              <span class="gpa-brand-icon">
+                GPA
+              </span>
+
+              <span class="gpa-brand-copy">
+                <strong>GPA Engenharia</strong>
+                <small>Portal Técnico</small>
+              </span>
+
             <% end %>
+
+            <!-- Fechar menu no celular -->
+            <button
+              type="button"
+              class="gpa-icon-button gpa-sidebar-close"
+              aria-label="Fechar menu"
+              data-action="click->gpa-shell#closeMenu"
+            >
+              <%= gpa_icon(:close) %>
+            </button>
+
+          </div>
+
+          <!-- ===================================
+               NAVEGAÇÃO
+               =================================== -->
+          <nav class="gpa-navigation" aria-label="Menu principal">
+
+            <p class="gpa-nav-caption">
+              Área de trabalho
+            </p>
+
+            <% navigation = [
+              ["Dashboard", dashboard_path, :dashboard],
+              ["Condomínios", condominios_path, :building],
+              ["Feed Técnico", post_tecnicos_path, :feed],
+              ["Estoque", estoque_root_path, :package],
+              ["Garantias", estoque_garantias_path, :shield]
+            ] %>
+
+            <% navigation.each do |label, path, icon| %>
+
+              <% active =
+                current_page?(path) ||
+                (
+                  path != dashboard_path &&
+                  request.path.start_with?(path.sub(/\/$/, "") + "/")
+                )
+              %>
+
+              <%= link_to path,
+                class: "gpa-nav-link #{'is-active' if active}",
+                title: label,
+                aria: { current: (active ? "page" : nil) },
+                data: { action: "click->gpa-shell#navigate" } do %>
+
+                <%= gpa_icon(icon) %>
+
+                <span class="gpa-nav-label">
+                  <%= label %>
+                </span>
+
+              <% end %>
+            <% end %>
+
+            <!-- Área administrativa -->
+            <% if current_user.admin? %>
+
+              <p class="gpa-nav-caption gpa-admin-caption">
+                Administração
+              </p>
+
+              <% active_users =
+                request.path == admin_users_path ||
+                request.path.start_with?(
+                  admin_users_path.sub(/\/$/, "") + "/"
+                )
+              %>
+
+              <%= link_to admin_users_path,
+                class: "gpa-nav-link #{'is-active' if active_users}",
+                title: "Usuários",
+                aria: { current: (active_users ? "page" : nil) },
+                data: { action: "click->gpa-shell#navigate" } do %>
+
+                <%= gpa_icon(:users) %>
+
+                <span class="gpa-nav-label">
+                  Usuários
+                </span>
+
+              <% end %>
+            <% end %>
+
           </nav>
 
-          <!-- Usuário fixado no final da sidebar -->
-          <div class="mt-auto border-t border-zinc-800 px-4 py-4 relative">
-            <details class="relative group">
-              <summary class="list-none cursor-pointer">
-                <div class="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-zinc-800 transition">
-                  <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-zinc-900 font-bold text-sm">
-                    <%= current_user.nome.to_s.first&.upcase || "U" %>
-                  </div>
+          <!-- ===================================
+               RODAPÉ DA SIDEBAR
+               =================================== -->
+          <div class="gpa-sidebar-bottom">
 
-                  <div class="flex-1 min-w-0">
-                    <div class="text-sm font-semibold text-zinc-100 truncate">
-                      <%= current_user.nome.presence || current_user.email %>
-                    </div>
+            <!-- Recolher sidebar no desktop -->
+            <button
+              type="button"
+              class="gpa-nav-link gpa-collapse-button"
+              title="Recolher ou expandir menu"
+              aria-label="Recolher ou expandir menu"
+              data-action="click->gpa-shell#toggleCollapse"
+            >
 
-                    <div class="text-xs text-zinc-500 capitalize">
-                      <%= current_user.role %>
-                    </div>
-                  </div>
+              <%= gpa_icon(:panel) %>
 
-                  <div class="text-zinc-500 group-open:rotate-180 transition">
-                    ▾
-                  </div>
-                </div>
+              <span class="gpa-nav-label">
+                Recolher menu
+              </span>
+
+            </button>
+
+            <!-- Identificação do usuário -->
+            <details class="gpa-user-menu">
+
+              <summary
+                class="gpa-user-summary"
+                title="Minha conta"
+              >
+
+                <!-- Avatar apenas na sidebar -->
+                <span class="gpa-avatar">
+                  <%= current_user.nome.to_s.first.presence&.upcase || "U" %>
+                </span>
+
+                <span class="gpa-user-copy">
+
+                  <strong>
+                    <%= current_user.nome.presence || current_user.email %>
+                  </strong>
+
+                  <small>
+                    <%= current_user.role %>
+                  </small>
+
+                </span>
+
+                <%= gpa_icon(:chevron) %>
+
               </summary>
 
-              <!-- Dropdown subindo para cima -->
-              <div class="absolute left-0 right-0 bottom-full mb-2 bg-zinc-900 border border-zinc-700 rounded-xl shadow-xl overflow-hidden z-50">
-                <div class="px-4 py-3 border-b border-zinc-800">
-                  <div class="text-sm font-semibold text-zinc-100 truncate">
+              <!-- Dropdown do usuário -->
+              <div class="gpa-user-dropdown">
+
+                <div class="gpa-dropdown-heading">
+
+                  <strong>
                     <%= current_user.nome.presence || current_user.email %>
-                  </div>
+                  </strong>
 
-                  <div class="text-xs text-zinc-500 truncate">
+                  <small>
                     <%= current_user.email %>
-                  </div>
+                  </small>
+
                 </div>
 
-                <div class="py-2">
-                  <% if current_user.admin? %>
-                    <%= link_to new_admin_user_path,
-                      class: "flex items-center gap-2 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-amber-400 transition" do %>
-                      <span>＋</span>
-                      <span>Novo usuário</span>
-                    <% end %>
+                <% if current_user.admin? %>
 
-                    <%= link_to edit_admin_user_path(current_user),
-                      class: "flex items-center gap-2 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-amber-400 transition" do %>
-                      <span>✎</span>
-                      <span>Editar meu usuário</span>
-                    <% end %>
+                  <%= link_to "Novo usuário",
+                    new_admin_user_path,
+                    class: "gpa-dropdown-link" %>
 
-                    <%= link_to admin_users_path,
-                      class: "flex items-center gap-2 px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-amber-400 transition" do %>
-                      <span>◎</span>
-                      <span>Lista de usuários</span>
-                    <% end %>
-                  <% end %>
+                  <%= link_to "Editar meu usuário",
+                    edit_admin_user_path(current_user),
+                    class: "gpa-dropdown-link" %>
 
-                  <div class="border-t border-zinc-800 mt-2 pt-2">
-                    <%= button_to destroy_user_session_path,
-                      method: :delete,
-                      form: { data: { turbo: false }, class: "w-full" },
-                      class: "w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-950/40 hover:text-red-300 bg-transparent border-0 cursor-pointer text-left transition" do %>
-                      <span>⎋</span>
-                      <span>Sair</span>
-                    <% end %>
-                  </div>
-                </div>
+                  <%= link_to "Lista de usuários",
+                    admin_users_path,
+                    class: "gpa-dropdown-link" %>
+
+                <% end %>
+
+                <!-- Logout -->
+                <%= button_to destroy_user_session_path,
+                  method: :delete,
+                  form: { data: { turbo: false } },
+                  class: "gpa-dropdown-link gpa-signout" do %>
+
+                  Sair da conta
+
+                <% end %>
+
               </div>
+
             </details>
+
           </div>
+
         </aside>
 
-        <!-- Conteúdo principal -->
-        <div class="ml-64 flex-1 min-h-screen flex flex-col bg-zinc-950">
-          
-          <!-- Top bar -->
-          <header class="bg-zinc-900 border-b border-zinc-800 px-6 py-4 flex items-center justify-between">
-            <%= link_to dashboard_path,
-              class: "text-lg font-semibold text-zinc-100 hover:text-amber-400 transition" do %>
-              <%= content_for?(:page_title) ? yield(:page_title) : "Dashboard" %>
-            <% end %>
+        <!-- ===================================
+             ÁREA PRINCIPAL
+             =================================== -->
+        <div class="gpa-main-area">
 
-            <div class="flex items-center gap-4">
-              <span class="text-xs text-zinc-500">
-                <%= l(Date.today, format: :long) rescue Date.today.strftime("%d/%m/%Y") %>
-              </span>
+          <!-- HEADER -->
+          <header class="gpa-topbar">
+
+            <div class="gpa-topbar-start">
+
+              <!-- Menu mobile -->
+              <button
+                type="button"
+                class="gpa-icon-button gpa-mobile-menu"
+                aria-label="Abrir menu"
+                aria-controls="gpa-sidebar"
+                aria-expanded="false"
+                data-gpa-shell-target="menuButton"
+                data-action="click->gpa-shell#toggleMenu"
+              >
+
+                <%= gpa_icon(:menu) %>
+
+              </button>
+
+              <!-- Título da página -->
+              <div class="gpa-heading-wrap">
+
+                <span class="gpa-eyebrow">
+                  GPA Engenharia / Portal Técnico
+                </span>
+
+                <h1 class="gpa-page-heading">
+                  <%= content_for?(:page_title) ?
+                    yield(:page_title) : "Dashboard" %>
+                </h1>
+
+              </div>
+
             </div>
+
+            <!-- Ações do cabeçalho -->
+            <div class="gpa-topbar-actions">
+
+              <!-- Data -->
+              <span class="gpa-topbar-date">
+                <%= l(Date.current, format: :long) rescue Date.current.strftime("%d/%m/%Y") %>
+              </span>
+
+              <!-- Botão de alternância de tema -->
+              <button
+                type="button"
+                class="gpa-icon-button gpa-theme-button"
+                aria-label="Alternar tema claro e escuro"
+                title="Alternar tema"
+                aria-pressed="false"
+                data-gpa-shell-target="themeButton"
+                data-action="click->gpa-shell#toggleTheme"
+              >
+
+                <!-- Ícone exibido no tema escuro -->
+                <span class="gpa-show-in-dark">
+                  <%= gpa_icon(:sun) %>
+                </span>
+
+                <!-- Ícone exibido no tema claro -->
+                <span class="gpa-show-in-light">
+                  <%= gpa_icon(:moon) %>
+                </span>
+
+              </button>
+
+              <!--
+                Avatar removido deste cabeçalho.
+                A identificação fica apenas na sidebar.
+              -->
+
+            </div>
+
           </header>
 
-          <!-- Flash messages -->
+          <!-- ===================================
+               MENSAGENS DO SISTEMA
+               =================================== -->
+
           <% if notice.present? %>
-            <div class="mx-6 mt-4 px-4 py-3 bg-emerald-900/50 border border-emerald-700 text-emerald-300 rounded-lg text-sm">
+
+            <div
+              class="gpa-flash gpa-flash-success"
+              role="status"
+            >
               <%= notice %>
             </div>
+
           <% end %>
 
           <% if alert.present? %>
-            <div class="mx-6 mt-4 px-4 py-3 bg-red-900/50 border border-red-700 text-red-300 rounded-lg text-sm">
+
+            <div
+              class="gpa-flash gpa-flash-danger"
+              role="alert"
+            >
               <%= alert %>
             </div>
+
           <% end %>
 
-          <!-- Conteúdo das telas -->
-          <main class="flex-1 p-6 overflow-y-auto">
+          <!-- ===================================
+               CONTEÚDO DAS PÁGINAS
+               =================================== -->
+          <main id="conteudo" class="gpa-content">
+
             <%= yield %>
+
           </main>
 
-          <footer class="border-t border-zinc-800 px-6 py-3 text-center text-xs text-zinc-600">
-            &copy; <%= Date.today.year %> GPA Engenharia. Todos os direitos reservados. &nbsp;|&nbsp; Versão 1.0.0
+          <!-- RODAPÉ -->
+          <footer class="gpa-footer">
+
+            © <%= Date.current.year %> GPA Engenharia ·
+            Portal Técnico · Versão 1.0.0
+
           </footer>
+
         </div>
+
       </div>
+
     <% else %>
-      <main class="min-h-screen flex items-center justify-center bg-zinc-950">
+
+      <!-- Layout para usuários não autenticados -->
+      <main class="gpa-guest">
         <%= yield %>
       </main>
+
     <% end %>
 
+    <!-- ===================================
+         NOTIFICAÇÕES DO ESTOQUE
+         =================================== -->
     <% if user_signed_in? %>
+
       <div
         data-controller="notificacoes-estoque"
         data-notificacoes-estoque-url-value="<%= estoque_notificacoes_transferencias_pendentes_path %>"
       ></div>
+
     <% end %>
+
   </body>
 </html>

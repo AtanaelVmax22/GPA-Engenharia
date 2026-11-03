@@ -14,6 +14,10 @@ class User < ApplicationRecord
 
   before_validation :set_default_role, on: :create
 
+  def nome_para_select
+    nome.presence || email
+  end
+
   private
 
   def set_default_role

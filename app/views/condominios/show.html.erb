@@ -1,106 +1,253 @@
+
 <% content_for :page_title, @condominio.nome %>
 
-<div class="mb-6 flex items-center gap-4">
-  <%= link_to "← Condomínios", condominios_path, class: "text-sm text-zinc-500 hover:text-zinc-300" %>
-</div>
+<div class="gpa-module">
 
-<!-- Header card -->
-<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-6">
-  <div class="flex items-start justify-between flex-wrap gap-4">
-    <div class="flex items-center gap-4">
-      <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-2xl">⌂</div>
-      <div>
-        <h1 class="text-xl font-bold text-zinc-100"><%= @condominio.nome %></h1>
-        <p class="text-zinc-500 text-sm"><%= @condominio.endereco_completo %></p>
-        <div class="mt-1"><%= status_badge(@condominio.status) %></div>
-      </div>
-    </div>
-    <div class="flex gap-2 flex-wrap">
-      <%= link_to "+ Equipamento", new_condominio_equipamento_path(@condominio), class: "px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs transition-colors" %>
-      <%= link_to "+ Histórico", new_condominio_historico_tecnico_path(@condominio), class: "px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs transition-colors" %>
-      <%= link_to "+ Checklist", new_condominio_checklist_path(@condominio), class: "px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs transition-colors" %>
-      <%= link_to "Editar", edit_condominio_path(@condominio), class: "px-3 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold rounded-lg text-xs transition-colors" %>
-    </div>
-  </div>
-
-  <!-- Info grid -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-zinc-800">
-    <div>
-      <p class="text-xs text-zinc-600">Síndico</p>
-      <p class="text-sm text-zinc-300"><%= @condominio.sindico_nome.presence || "—" %></p>
-    </div>
-    <div>
-      <p class="text-xs text-zinc-600">Telefone</p>
-      <p class="text-sm text-zinc-300"><%= @condominio.sindico_telefone.presence || "—" %></p>
-    </div>
-    <div>
-      <p class="text-xs text-zinc-600">E-mail</p>
-      <p class="text-sm text-zinc-300 truncate"><%= @condominio.sindico_email.presence || "—" %></p>
-    </div>
-    <div>
-      <p class="text-xs text-zinc-600">Unidades</p>
-      <p class="text-sm text-zinc-300"><%= @condominio.unidades || "—" %></p>
-    </div>
-    <% if @condominio.observacoes.present? %>
-      <div class="col-span-2 md:col-span-4">
-        <p class="text-xs text-zinc-600">Observações</p>
-        <p class="text-sm text-zinc-400"><%= @condominio.observacoes %></p>
-      </div>
+  <!-- Voltar -->
+  <div>
+    <%= link_to condominios_path,
+      class: "gpa-back-link" do %>
+      <span>←</span>
+      Voltar para Condomínios
     <% end %>
   </div>
-</div>
 
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-  <!-- Equipamentos -->
-  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="font-semibold text-zinc-100">Equipamentos Instalados</h2>
-      <span class="text-xs text-zinc-500"><%= @equipamentos.count %> no total</span>
+  <!-- Informações principais -->
+  <section class="gpa-panel">
+
+    <div class="gpa-detail-header">
+
+      <div class="gpa-detail-identity">
+        <span class="gpa-condominio-icon gpa-detail-icon">
+          <%= gpa_icon(:building) %>
+        </span>
+
+        <div class="gpa-detail-title">
+          <h2><%= @condominio.nome %></h2>
+
+          <p>
+            <%= @condominio.endereco_completo.presence ||
+              "Endereço não informado" %>
+          </p>
+
+          <div class="gpa-detail-status">
+            <%= status_badge(@condominio.status) %>
+          </div>
+        </div>
+      </div>
+
+      <div class="gpa-detail-actions">
+
+        <%= link_to new_condominio_equipamento_path(@condominio),
+          class: "gpa-btn gpa-btn-secondary" do %>
+          <%= gpa_icon(:plus) %>
+          <span>Equipamento</span>
+        <% end %>
+
+        <%= link_to new_condominio_historico_tecnico_path(@condominio),
+          class: "gpa-btn gpa-btn-secondary" do %>
+          <%= gpa_icon(:plus) %>
+          <span>Histórico</span>
+        <% end %>
+
+        <%= link_to new_condominio_checklist_path(@condominio),
+          class: "gpa-btn gpa-btn-secondary" do %>
+          <%= gpa_icon(:plus) %>
+          <span>Checklist</span>
+        <% end %>
+
+        <%= link_to edit_condominio_path(@condominio),
+          class: "gpa-btn gpa-btn-primary" do %>
+          <%= gpa_icon(:edit) %>
+          <span>Editar</span>
+        <% end %>
+
+      </div>
     </div>
-    <% if @equipamentos.any? %>
-      <% @equipamentos.group_by(&:categoria).each do |categoria, equips| %>
-        <div class="mb-3">
-          <p class="text-xs text-zinc-600 uppercase tracking-wider mb-2"><%= categoria %></p>
-          <% equips.each do |e| %>
-            <div class="flex items-center justify-between py-2 border-b border-zinc-800 last:border-0">
-              <div>
-                <p class="text-sm text-zinc-300"><%= e.nome %></p>
-                <p class="text-xs text-zinc-600"><%= e.localizacao.presence || e.modelo.presence || "—" %></p>
-              </div>
-              <div class="flex items-center gap-2">
-                <%= status_badge(e.status) %>
-                <%= link_to "ver", equipamento_path(e), class: "text-xs text-amber-400 hover:text-amber-300" %>
-              </div>
-            </div>
+
+    <!-- Dados -->
+    <dl class="gpa-info-grid">
+
+      <div class="gpa-info-item">
+        <dt>Síndico</dt>
+        <dd>
+          <%= @condominio.sindico_nome.presence || "Não informado" %>
+        </dd>
+      </div>
+
+      <div class="gpa-info-item">
+        <dt>Telefone</dt>
+        <dd>
+          <% if @condominio.sindico_telefone.present? %>
+            <%= link_to @condominio.sindico_telefone,
+              "tel:#{@condominio.sindico_telefone.gsub(/[^\d+]/, '')}",
+              class: "gpa-text-link" %>
+          <% else %>
+            Não informado
           <% end %>
+        </dd>
+      </div>
+
+      <div class="gpa-info-item">
+        <dt>E-mail</dt>
+        <dd>
+          <% if @condominio.sindico_email.present? %>
+            <%= mail_to @condominio.sindico_email,
+              @condominio.sindico_email,
+              class: "gpa-text-link" %>
+          <% else %>
+            Não informado
+          <% end %>
+        </dd>
+      </div>
+
+      <div class="gpa-info-item">
+        <dt>Unidades</dt>
+        <dd><%= @condominio.unidades || "—" %></dd>
+      </div>
+
+      <% if @condominio.observacoes.present? %>
+        <div class="gpa-info-item gpa-info-full">
+          <dt>Observações</dt>
+          <dd class="gpa-preserve-lines">
+            <%= @condominio.observacoes %>
+          </dd>
         </div>
       <% end %>
-    <% else %>
-      <p class="text-sm text-zinc-600">Nenhum equipamento cadastrado.</p>
-    <% end %>
-  </div>
 
-  <!-- Histórico recente -->
-  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="font-semibold text-zinc-100">Histórico de Atendimentos</h2>
-      <%= link_to "Ver todos", condominio_historico_tecnicos_path(@condominio), class: "text-xs text-amber-400 hover:text-amber-300" %>
-    </div>
-    <% if @historicos.any? %>
-      <div class="space-y-3">
-        <% @historicos.each do |h| %>
-          <div class="flex items-start gap-3 py-2 border-b border-zinc-800 last:border-0">
-            <div class="mt-0.5"><%= tipo_badge(h.tipo) %></div>
-            <div class="flex-1 min-w-0">
-              <%= link_to h.titulo, h, class: "text-sm text-zinc-300 hover:text-amber-400 block truncate" %>
-              <p class="text-xs text-zinc-600"><%= h.user.nome %> &mdash; <%= h.data_atendimento.strftime("%d/%m/%Y") %></p>
-            </div>
-            <%= status_badge(h.status) %>
+    </dl>
+  </section>
+
+  <!-- Equipamentos e atendimentos -->
+  <div class="gpa-detail-columns">
+
+    <!-- Equipamentos -->
+    <section class="gpa-panel">
+      <div class="gpa-panel-header">
+        <div>
+          <h2 class="gpa-panel-title">
+            Equipamentos Instalados
+          </h2>
+          <p class="gpa-panel-subtitle">
+            Equipamentos vinculados ao condomínio
+          </p>
+        </div>
+
+        <span class="gpa-count-badge">
+          <%= @equipamentos.size %>
+        </span>
+      </div>
+
+      <% if @equipamentos.any? %>
+
+        <% @equipamentos.group_by(&:categoria).each do |categoria, equipamentos| %>
+
+          <div class="gpa-equipment-group">
+
+            <h3 class="gpa-category-heading">
+              <%= categoria.presence || "Sem categoria" %>
+            </h3>
+
+            <% equipamentos.each do |equipamento| %>
+
+              <div class="gpa-record-item">
+
+                <div class="gpa-record-content">
+                  <p class="gpa-record-title">
+                    <%= equipamento.nome %>
+                  </p>
+
+                  <p class="gpa-record-subtitle">
+                    <%= equipamento.localizacao.presence ||
+                      equipamento.modelo.presence ||
+                      "Localização não informada" %>
+                  </p>
+                </div>
+
+                <div class="gpa-record-actions">
+                  <%= status_badge(equipamento.status) %>
+
+                  <%= link_to "Ver",
+                    equipamento_path(equipamento),
+                    class: "gpa-text-link" %>
+                </div>
+
+              </div>
+            <% end %>
+
           </div>
         <% end %>
+
+      <% else %>
+        <div class="gpa-inline-empty">
+          Nenhum equipamento cadastrado.
+        </div>
+      <% end %>
+
+    </section>
+
+    <!-- Histórico técnico -->
+    <section class="gpa-panel">
+
+      <div class="gpa-panel-header">
+        <div>
+          <h2 class="gpa-panel-title">
+            Histórico de Atendimentos
+          </h2>
+          <p class="gpa-panel-subtitle">
+            Registros técnicos recentes
+          </p>
+        </div>
+
+        <%= link_to "Ver todos",
+          condominio_historico_tecnicos_path(@condominio),
+          class: "gpa-text-link" %>
       </div>
-    <% else %>
-      <p class="text-sm text-zinc-600">Nenhum registro técnico.</p>
-    <% end %>
+
+      <% if @historicos.any? %>
+
+        <div class="gpa-record-list">
+
+          <% @historicos.each do |historico| %>
+
+            <div class="gpa-record-item gpa-history-item">
+
+              <div class="gpa-record-content">
+
+                <div class="gpa-record-type">
+                  <%= tipo_badge(historico.tipo) %>
+                </div>
+
+                <%= link_to historico.titulo,
+                  historico,
+                  class: "gpa-record-title gpa-record-link" %>
+
+                <p class="gpa-record-subtitle">
+                  <%= historico.user&.nome.presence || "Usuário não informado" %>
+                  ·
+                  <%= historico.data_atendimento ?
+                    historico.data_atendimento.strftime("%d/%m/%Y") :
+                    "Sem data" %>
+                </p>
+              </div>
+
+              <div class="gpa-record-actions">
+                <%= status_badge(historico.status) %>
+              </div>
+
+            </div>
+
+          <% end %>
+
+        </div>
+
+      <% else %>
+        <div class="gpa-inline-empty">
+          Nenhum registro técnico encontrado.
+        </div>
+      <% end %>
+
+    </section>
+
   </div>
 </div>

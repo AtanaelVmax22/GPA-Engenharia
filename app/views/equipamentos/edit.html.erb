@@ -1,2 +1,31 @@
+
 <% content_for :page_title, "Editar Equipamento" %>
-<%= render "form", equipamento: @equipamento %>
+
+<div class="gpa-module gpa-form-page">
+
+  <%= link_to equipamento_path(@equipamento),
+    class: "gpa-back-link" do %>
+
+    <span>←</span>
+    <span>Voltar aos detalhes</span>
+
+  <% end %>
+
+  <div class="gpa-module-header">
+
+    <div class="gpa-module-heading">
+
+      <h2>Editar Equipamento</h2>
+
+      <p>
+        Atualize as informações de
+        <strong><%= @equipamento.nome %></strong>.
+      </p>
+
+    </div>
+
+  </div>
+
+  <%= render "form", equipamento: @equipamento %>
+
+</div>

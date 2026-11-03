@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_10_234924) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_01_031440) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -116,6 +116,32 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_10_234924) do
     t.index ["condominio_id"], name: "index_equipamentos_on_condominio_id"
   end
 
+  create_table "estoque_itens", force: :cascade do |t|
+    t.bigint "produto_id", null: false
+    t.bigint "local_id"
+    t.bigint "condominio_id"
+    t.string "codigo_patrimonio"
+    t.string "numero_serie"
+    t.string "mac"
+    t.integer "status", default: 0, null: false
+    t.date "data_compra"
+    t.date "data_instalacao"
+    t.string "fornecedor_nome"
+    t.string "nota_fiscal_numero"
+    t.integer "garantia_loja_dias", default: 90, null: false
+    t.integer "garantia_fabrica_meses", default: 12, null: false
+    t.text "observacao"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["codigo_patrimonio"], name: "index_estoque_itens_on_codigo_patrimonio"
+    t.index ["condominio_id"], name: "index_estoque_itens_on_condominio_id"
+    t.index ["local_id"], name: "index_estoque_itens_on_local_id"
+    t.index ["mac"], name: "index_estoque_itens_on_mac"
+    t.index ["numero_serie"], name: "index_estoque_itens_on_numero_serie"
+    t.index ["produto_id"], name: "index_estoque_itens_on_produto_id"
+    t.index ["status"], name: "index_estoque_itens_on_status"
+  end
+
   create_table "estoque_locais", force: :cascade do |t|
     t.string "nome", null: false
     t.integer "tipo", default: 0, null: false
@@ -130,6 +156,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_10_234924) do
     t.datetime "updated_at", null: false
     t.index ["qr_token"], name: "index_estoque_locais_on_qr_token", unique: true
     t.index ["responsavel_id"], name: "index_estoque_locais_on_responsavel_id"
+  end
+
+  create_table "estoque_local_responsaveis", force: :cascade do |t|
+    t.bigint "local_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["local_id", "user_id"], name: "index_estoque_local_responsaveis_unique", unique: true
+    t.index ["local_id"], name: "index_estoque_local_responsaveis_on_local_id"
+    t.index ["user_id"], name: "index_estoque_local_responsaveis_on_user_id"
   end
 
   create_table "estoque_movimentacoes", force: :cascade do |t|
@@ -248,7 +284,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_10_234924) do
   add_foreign_key "curtidas", "post_tecnicos"
   add_foreign_key "curtidas", "users"
   add_foreign_key "equipamentos", "condominios"
+  add_foreign_key "estoque_itens", "estoque_locais", column: "local_id"
+  add_foreign_key "estoque_itens", "estoque_produtos", column: "produto_id"
   add_foreign_key "estoque_locais", "users", column: "responsavel_id"
+  add_foreign_key "estoque_local_responsaveis", "estoque_locais", column: "local_id"
+  add_foreign_key "estoque_local_responsaveis", "users"
   add_foreign_key "estoque_movimentacoes", "estoque_locais", column: "destino_local_id"
   add_foreign_key "estoque_movimentacoes", "estoque_locais", column: "origem_local_id"
   add_foreign_key "estoque_movimentacoes", "estoque_produtos", column: "produto_id"

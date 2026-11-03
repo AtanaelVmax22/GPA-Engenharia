@@ -1,0 +1,146 @@
+<%= form_with model: [:estoque, @item], class: "space-y-6" do |form| %>
+  <% if @item.errors.any? %>
+    <div class="bg-red-500/10 border border-red-500/30 text-red-300 rounded-xl p-4">
+      <h3 class="font-bold mb-2">Corrija os erros abaixo:</h3>
+
+      <ul class="list-disc list-inside text-sm space-y-1">
+        <% @item.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-5">
+    <h3 class="text-zinc-100 font-bold">Identificação do item</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <%= form.label :produto_id, "Produto", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.collection_select :produto_id,
+          @produtos,
+          :id,
+          :nome,
+          { prompt: "Selecione o produto" },
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+      </div>
+
+      <div>
+        <%= form.label :local_id, "Depósito/local atual", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.collection_select :local_id,
+          @locais,
+          :id,
+          :nome,
+          { include_blank: "Sem local definido" },
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+      </div>
+
+      <div>
+        <%= form.label :codigo_patrimonio, "Código de patrimônio", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.text_field :codigo_patrimonio,
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
+          placeholder: "Ex: ONU-0001" %>
+      </div>
+
+      <div>
+        <%= form.label :numero_serie, "Número de série", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.text_field :numero_serie,
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
+          placeholder: "Serial do equipamento" %>
+      </div>
+
+      <div>
+        <%= form.label :mac, "MAC", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.text_field :mac,
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
+          placeholder: "Ex: AA:BB:CC:DD:EE:FF" %>
+      </div>
+
+      <div>
+        <%= form.label :status, "Status", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.select :status,
+          Estoque::Item.statuses.keys.map { |status| [status_item_label(status), status] },
+          {},
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-5">
+    <h3 class="text-zinc-100 font-bold">Compra e garantia</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <%= form.label :fornecedor_nome, "Fornecedor/loja", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.text_field :fornecedor_nome,
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
+          placeholder: "Nome da loja ou fornecedor" %>
+      </div>
+
+      <div>
+        <%= form.label :nota_fiscal_numero, "Número da nota fiscal", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.text_field :nota_fiscal_numero,
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
+          placeholder: "Ex: NF 12345" %>
+      </div>
+
+      <div>
+        <%= form.label :data_compra, "Data da compra", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.date_field :data_compra,
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+      </div>
+
+      <div>
+        <%= form.label :data_instalacao, "Data da instalação", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.date_field :data_instalacao,
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+      </div>
+
+      <div>
+        <%= form.label :garantia_loja_dias, "Garantia da loja em dias", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.number_field :garantia_loja_dias,
+          min: 0,
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+      </div>
+
+      <div>
+        <%= form.label :garantia_fabrica_meses, "Garantia da fábrica em meses", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.number_field :garantia_fabrica_meses,
+          min: 0,
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-5">
+    <h3 class="text-zinc-100 font-bold">Instalação</h3>
+
+    <div>
+      <%= form.label :condominio_id, "ID do condomínio", class: "block text-sm text-zinc-300 mb-1" %>
+      <%= form.number_field :condominio_id,
+        class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
+        placeholder: "Por enquanto informe o ID do condomínio, depois vamos trocar por lista" %>
+
+      <p class="text-xs text-zinc-500 mt-1">
+        Nesta etapa vamos salvar apenas o ID. Depois vamos vincular direto com o cadastro de condomínios.
+      </p>
+    </div>
+
+    <div>
+      <%= form.label :observacao, "Observação", class: "block text-sm text-zinc-300 mb-1" %>
+      <%= form.text_area :observacao,
+        rows: 4,
+        class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
+        placeholder: "Detalhes do item, instalação, defeito ou garantia" %>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-end gap-3">
+    <%= link_to "Cancelar",
+      estoque_itens_path,
+      class: "px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-100" %>
+
+    <%= form.submit "Salvar item",
+      class: "px-5 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-lg cursor-pointer" %>
+  </div>
+<% end %>

@@ -1,53 +1,173 @@
-<%= form_with model: equipamento.new_record? ? [@condominio, equipamento] : equipamento, class: "space-y-6" do |f| %>
+
+<%= form_with(
+  model: equipamento.new_record? ? [@condominio, equipamento] : equipamento,
+  class: "gpa-form"
+) do |f| %>
+
+  <!-- ERROS DE VALIDAÇÃO -->
   <% if equipamento.errors.any? %>
-    <div class="bg-red-900/50 border border-red-700 rounded-xl p-4 text-red-300 text-sm">
-      <% equipamento.errors.full_messages.each do |msg| %><div>&bull; <%= msg %></div><% end %>
+
+    <div class="gpa-form-errors" role="alert">
+
+      <strong>
+        Não foi possível salvar o equipamento.
+      </strong>
+
+      <ul>
+        <% equipamento.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+
     </div>
+
   <% end %>
-  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-    <h2 class="text-base font-semibold text-amber-400 mb-4">Equipamento</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="md:col-span-2">
-        <%= f.label :nome, "Nome do Equipamento", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :nome, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
+
+  <!-- DADOS DO EQUIPAMENTO -->
+  <section class="gpa-panel">
+
+    <div class="gpa-panel-header">
       <div>
-        <%= f.label :categoria, "Categoria", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.select :categoria, Equipamento::CATEGORIAS, {}, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div>
-        <%= f.label :status, "Status", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.select :status, Equipamento.statuses.keys.map { |s| [s.humanize, s] }, {}, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div>
-        <%= f.label :marca, "Marca", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :marca, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div>
-        <%= f.label :modelo, "Modelo", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :modelo, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div>
-        <%= f.label :numero_serie, "Número de Série", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :numero_serie, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div>
-        <%= f.label :data_instalacao, "Data de Instalação", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.date_field :data_instalacao, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div class="md:col-span-2">
-        <%= f.label :localizacao, "Localização no Condomínio", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :localizacao, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500", placeholder: "Ex: Garagem subsolo, portaria social..." %>
-      </div>
-      <div class="md:col-span-2">
-        <%= f.label :observacoes, "Observações", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_area :observacoes, rows: 3, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500 resize-none" %>
+        <h2 class="gpa-panel-title">
+          Informações do Equipamento
+        </h2>
+
+        <p class="gpa-panel-subtitle">
+          Identificação, categoria e situação operacional.
+        </p>
       </div>
     </div>
+
+    <div class="gpa-form-grid">
+
+      <!-- NOME -->
+      <div class="gpa-field gpa-field-full">
+        <%= f.label :nome, "Nome do Equipamento",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :nome,
+          class: "gpa-input",
+          placeholder: "Ex.: Câmera IP Portaria" %>
+      </div>
+
+      <!-- CATEGORIA -->
+      <div class="gpa-field">
+        <%= f.label :categoria, "Categoria",
+          class: "gpa-form-label" %>
+
+        <%= f.select :categoria,
+          Equipamento::CATEGORIAS,
+          {},
+          class: "gpa-input gpa-select" %>
+      </div>
+
+      <!-- STATUS -->
+      <div class="gpa-field">
+        <%= f.label :status, "Status",
+          class: "gpa-form-label" %>
+
+        <%= f.select :status,
+          Equipamento.statuses.keys.map { |s| [s.humanize, s] },
+          {},
+          class: "gpa-input gpa-select" %>
+      </div>
+
+      <!-- MARCA -->
+      <div class="gpa-field">
+        <%= f.label :marca, "Marca",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :marca,
+          class: "gpa-input",
+          placeholder: "Fabricante" %>
+      </div>
+
+      <!-- MODELO -->
+      <div class="gpa-field">
+        <%= f.label :modelo, "Modelo",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :modelo,
+          class: "gpa-input",
+          placeholder: "Modelo do equipamento" %>
+      </div>
+
+      <!-- NÚMERO DE SÉRIE -->
+      <div class="gpa-field">
+        <%= f.label :numero_serie, "Número de Série",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :numero_serie,
+          class: "gpa-input",
+          placeholder: "Número de série" %>
+      </div>
+
+      <!-- DATA DE INSTALAÇÃO -->
+      <div class="gpa-field">
+        <%= f.label :data_instalacao, "Data de Instalação",
+          class: "gpa-form-label" %>
+
+        <%= f.date_field :data_instalacao,
+          class: "gpa-input" %>
+      </div>
+
+      <!-- LOCALIZAÇÃO -->
+      <div class="gpa-field gpa-field-full">
+        <%= f.label :localizacao, "Localização no Condomínio",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :localizacao,
+          class: "gpa-input",
+          placeholder: "Ex.: Garagem, portaria social, casa de máquinas..." %>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- OBSERVAÇÕES -->
+  <section class="gpa-panel">
+
+    <div class="gpa-panel-header">
+      <div>
+        <h2 class="gpa-panel-title">
+          Observações Técnicas
+        </h2>
+
+        <p class="gpa-panel-subtitle">
+          Informações adicionais sobre a instalação ou equipamento.
+        </p>
+      </div>
+    </div>
+
+    <div class="gpa-field">
+
+      <%= f.label :observacoes, "Observações",
+        class: "gpa-form-label" %>
+
+      <%= f.text_area :observacoes,
+        rows: 5,
+        class: "gpa-input gpa-textarea",
+        placeholder: "Registre observações relevantes sobre o equipamento..." %>
+
+    </div>
+
+  </section>
+
+  <!-- AÇÕES -->
+  <div class="gpa-form-footer">
+
+    <%= f.submit(
+      equipamento.new_record? ?
+        "Cadastrar Equipamento" :
+        "Salvar Alterações",
+      class: "gpa-btn gpa-btn-primary"
+    ) %>
+
+    <%= link_to "Cancelar",
+      condominio_path(@condominio),
+      class: "gpa-btn gpa-btn-secondary" %>
+
   </div>
-  <div class="flex gap-3">
-    <%= f.submit equipamento.new_record? ? "Cadastrar Equipamento" : "Salvar Alterações",
-        class: "px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold rounded-xl text-sm cursor-pointer transition-colors" %>
-    <%= link_to "Cancelar", condominio_path(@condominio), class: "px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl text-sm transition-colors" %>
-  </div>
+
 <% end %>

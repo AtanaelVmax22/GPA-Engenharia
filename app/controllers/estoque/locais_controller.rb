@@ -1,5 +1,6 @@
 module Estoque
   class LocaisController < BaseController
+    before_action :carregar_usuarios, only: [:new, :edit, :create, :update]
     before_action :set_local, only: [:show, :edit, :update, :destroy, :qr]
     before_action :require_admin!, except: [:index, :show, :qr]
 
@@ -7,24 +8,26 @@ module Estoque
       @locais = Local.ativos.order(:nome)
     end
 
-   def show
-  saldos_scope = @local.saldos.includes(:produto).order("estoque_produtos.nome")
+    def show
+      saldos_scope = @local
+        .saldos
+        .includes(:produto)
+        .order("estoque_produtos.nome")
 
-  @saldos_pagination = helpers.pagination_metadata(
-    saldos_scope,
-    page: params[:page].presence || 1,
-    per_page: 15
-  )
+      @saldos_pagination = helpers.pagination_metadata(
+        saldos_scope,
+        page: params[:page].presence || 1,
+        per_page: 15
+      )
 
-  @saldos = @saldos_pagination[:records]
+      @saldos = @saldos_pagination[:records]
 
-  @movimentacoes = Movimentacao
-    .includes(:produto, :origem_local, :destino_local, :user)
-    .where("origem_local_id = :id OR destino_local_id = :id", id: @local.id)
-    .order(created_at: :desc)
-    .limit(20)
-   end
-
+      @movimentacoes = Movimentacao
+        .includes(:produto, :origem_local, :destino_local, :user)
+        .where("origem_local_id = :id OR destino_local_id = :id", id: @local.id)
+        .order(created_at: :desc)
+        .limit(20)
+    end
 
     def new
       @local = Local.new(tipo: :central, ativo: true)
@@ -32,6 +35,12 @@ module Estoque
 
     def create
       @local = Local.new(local_params)
+
+      if responsaveis_acima_do_limite?
+        flash.now[:alert] = "Selecione no máximo 3 responsáveis por depósito."
+        render :new, status: :unprocessable_entity
+        return
+      end
 
       if @local.save
         redirect_to estoque_local_path(@local), notice: "Estoque cadastrado com sucesso."
@@ -44,6 +53,12 @@ module Estoque
     end
 
     def update
+      if responsaveis_acima_do_limite?
+        flash.now[:alert] = "Selecione no máximo 3 responsáveis por depósito."
+        render :edit, status: :unprocessable_entity
+        return
+      end
+
       if @local.update(local_params)
         redirect_to estoque_local_path(@local), notice: "Estoque atualizado com sucesso."
       else
@@ -61,8 +76,20 @@ module Estoque
 
     private
 
+    def carregar_usuarios
+      @usuarios = User.order(:nome, :email)
+    end
+
     def set_local
       @local = Local.find(params[:id])
+    end
+
+    def responsaveis_acima_do_limite?
+      ids = params.dig(:estoque_local, :responsavel_ids)
+
+      return false if ids.blank?
+
+      ids.reject(&:blank?).size > 3
     end
 
     def local_params
@@ -74,7 +101,8 @@ module Estoque
         :endereco,
         :descricao,
         :responsavel_id,
-        :ativo
+        :ativo,
+        responsavel_ids: []
       )
     end
   end

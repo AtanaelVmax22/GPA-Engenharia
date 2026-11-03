@@ -42,8 +42,22 @@
     </div>
 
     <div>
-      <div class="text-zinc-500">Responsável</div>
-      <div class="text-zinc-100"><%= @local.responsavel&.nome || "-" %></div>
+      <div class="text-zinc-500">Responsáveis</div>
+
+      <% responsaveis = @local.respond_to?(:responsaveis) ? @local.responsaveis.to_a : [] %>
+      <% responsaveis = [@local.responsavel].compact if responsaveis.empty? && @local.respond_to?(:responsavel) %>
+
+      <% if responsaveis.any? %>
+        <div class="space-y-1">
+          <% responsaveis.each do |responsavel| %>
+            <div class="text-zinc-100">
+              <%= responsavel.nome.presence || responsavel.email %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-zinc-100">-</div>
+      <% end %>
     </div>
 
     <div class="md:col-span-3">
@@ -55,6 +69,7 @@
   <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
     <div class="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
       <h3 class="font-bold text-zinc-100">Itens neste estoque</h3>
+
       <span class="text-xs text-zinc-500">
         Lista paginada
       </span>
