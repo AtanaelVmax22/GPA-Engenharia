@@ -1,0 +1,54 @@
+<% content_for :page_title do %>
+  Movimentações
+<% end %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-zinc-100">Movimentações</h2>
+      <p class="text-sm text-zinc-500">Histórico auditável de entradas, saídas, transferências e ajustes.</p>
+    </div>
+
+    <%= link_to "Nova movimentação", new_estoque_movimentacao_path,
+      class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold rounded-lg text-sm" %>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-zinc-800/70 text-zinc-400">
+        <tr>
+          <th class="px-4 py-3 text-left">Data</th>
+          <th class="px-4 py-3 text-left">Tipo</th>
+          <th class="px-4 py-3 text-left">Produto</th>
+          <th class="px-4 py-3 text-left">Origem</th>
+          <th class="px-4 py-3 text-left">Destino</th>
+          <th class="px-4 py-3 text-right">Qtd</th>
+          <th class="px-4 py-3 text-left">Usuário</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-zinc-800">
+        <% @movimentacoes.each do |mov| %>
+          <tr class="hover:bg-zinc-800/40">
+            <td class="px-4 py-3 text-zinc-400"><%= mov.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+            <td class="px-4 py-3 text-amber-400"><%= mov.tipo.humanize %></td>
+            <td class="px-4 py-3"><%= link_to mov.produto.nome, estoque_produto_path(mov.produto), class: "text-zinc-100 hover:text-amber-300" %></td>
+            <td class="px-4 py-3 text-zinc-400"><%= mov.origem_local&.nome || "-" %></td>
+            <td class="px-4 py-3 text-zinc-400"><%= mov.destino_local&.nome || "-" %></td>
+            <td class="px-4 py-3 text-right text-zinc-100 font-semibold"><%= formatar_quantidade(mov.quantidade) %></td>
+            <td class="px-4 py-3 text-zinc-400"><%= mov.user.nome.presence || mov.user.email %></td>
+          </tr>
+        <% end %>
+
+        <% if @movimentacoes.empty? %>
+          <tr>
+            <td colspan="7" class="px-4 py-6 text-center text-zinc-500">
+              Nenhuma movimentação registrada.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <%= render "shared/pagination", pagination: @movimentacoes_pagination %>
+  </div>
+</div>

@@ -1,4 +1,216 @@
-<div>
-  <h1 class="font-bold text-4xl">HistoricoTecnicos#index</h1>
-  <p>Find me in app/views/historico_tecnicos/index.html.erb</p>
+
+<% content_for :page_title, "Histórico Técnico" %>
+
+<div class="gpa-module">
+
+  <!-- CABEÇALHO -->
+  <div class="gpa-module-header">
+
+    <div class="gpa-module-heading">
+      <h2>Histórico de Atendimentos</h2>
+
+      <p>
+        Consulte os registros técnicos do condomínio
+        <strong><%= @condominio.nome %></strong>.
+      </p>
+    </div>
+
+    <%= link_to new_condominio_historico_tecnico_path(@condominio),
+      class: "gpa-btn gpa-btn-primary" do %>
+
+      <%= gpa_icon(:plus) %>
+      <span>Novo Atendimento</span>
+
+    <% end %>
+  </div>
+
+  <!-- VOLTAR -->
+  <div>
+    <%= link_to condominio_path(@condominio),
+      class: "gpa-back-link" do %>
+
+      <span>←</span>
+      <span>Voltar ao Condomínio</span>
+
+    <% end %>
+  </div>
+
+  <!-- FILTROS -->
+  <section class="gpa-panel gpa-filter-panel">
+
+    <%= form_with(
+      url: condominio_historico_tecnicos_path(@condominio),
+      method: :get,
+      class: "gpa-filter-form"
+    ) do |f| %>
+
+      <div class="gpa-filter-search">
+        <%= f.label :tipo, "Tipo de Atendimento",
+          class: "gpa-form-label" %>
+
+        <%= f.select :tipo,
+          HistoricoTecnico.tipos.keys.map { |tipo|
+            [tipo.humanize, tipo]
+          },
+          {
+            include_blank: "Todos os tipos",
+            selected: params[:tipo]
+          },
+          class: "gpa-input gpa-select" %>
+      </div>
+
+      <div class="gpa-filter-actions">
+        <%= f.submit "Filtrar",
+          class: "gpa-btn gpa-btn-primary" %>
+
+        <%= link_to "Limpar",
+          condominio_historico_tecnicos_path(@condominio),
+          class: "gpa-btn gpa-btn-secondary" %>
+      </div>
+
+    <% end %>
+
+  </section>
+
+  <!-- RESULTADOS -->
+  <div class="gpa-results-heading">
+    <h3>Registros técnicos</h3>
+
+    <span class="gpa-count-badge">
+      <%= @historicos.size %> nesta página
+    </span>
+  </div>
+
+  <% if @historicos.any? %>
+
+    <div class="gpa-historico-grid">
+
+      <% @historicos.each do |historico| %>
+
+        <article class="gpa-condominio-card">
+
+          <!-- IDENTIFICAÇÃO -->
+          <div class="gpa-historico-card-top">
+
+            <span class="gpa-condominio-icon">
+              <%= gpa_icon(:feed) %>
+            </span>
+
+            <div class="gpa-condominio-identification">
+              <h3>
+                <%= link_to historico.titulo,
+                  historico_tecnico_path(historico),
+                  class: "gpa-condominio-name" %>
+              </h3>
+
+              <p>
+                <%= historico.data_atendimento ?
+                  historico.data_atendimento.strftime("%d/%m/%Y às %H:%M") :
+                  "Data não informada" %>
+              </p>
+            </div>
+
+          </div>
+
+          <!-- CLASSIFICAÇÃO -->
+          <div class="gpa-historico-badges">
+            <%= tipo_badge(historico.tipo) %>
+            <%= status_badge(historico.status) %>
+          </div>
+
+          <!-- INFORMAÇÕES -->
+          <dl class="gpa-condominio-details">
+
+            <div>
+              <dt>Técnico responsável</dt>
+
+              <dd>
+                <%= historico.user&.nome.presence ||
+                  historico.user&.email ||
+                  "Não informado" %>
+              </dd>
+            </div>
+
+            <div>
+              <dt>Equipamento</dt>
+
+              <dd>
+                <%= historico.equipamento&.nome.presence ||
+                  "Atendimento geral" %>
+              </dd>
+            </div>
+
+          </dl>
+
+          <% if historico.descricao.present? %>
+            <p class="gpa-historico-description">
+              <%= truncate(
+                historico.descricao,
+                length: 170
+              ) %>
+            </p>
+          <% end %>
+
+          <!-- AÇÕES -->
+          <div class="gpa-condominio-actions">
+
+            <%= link_to historico_tecnico_path(historico),
+              class: "gpa-btn gpa-btn-secondary gpa-card-main-action" do %>
+
+              <span>Ver detalhes</span>
+              <%= gpa_icon(:arrow) %>
+
+            <% end %>
+
+            <%= link_to edit_historico_tecnico_path(historico),
+              class: "gpa-btn gpa-btn-outline" do %>
+
+              <%= gpa_icon(:edit) %>
+              <span>Editar</span>
+
+            <% end %>
+
+          </div>
+
+        </article>
+
+      <% end %>
+
+    </div>
+
+  <% else %>
+
+    <div class="gpa-empty-state">
+
+      <span class="gpa-empty-icon">
+        <%= gpa_icon(:feed) %>
+      </span>
+
+      <h3>Nenhum atendimento encontrado</h3>
+
+      <p>
+        Não existem registros técnicos para os filtros
+        selecionados.
+      </p>
+
+      <%= link_to "Registrar Atendimento",
+        new_condominio_historico_tecnico_path(@condominio),
+        class: "gpa-btn gpa-btn-primary" %>
+
+    </div>
+
+  <% end %>
+
+  <!-- PAGINAÇÃO -->
+  <% if @pagy && @pagy.pages > 1 %>
+
+    <nav
+      class="gpa-pagination"
+      aria-label="Paginação do histórico técnico"
+    >
+      <%== pagy_nav(@pagy) %>
+    </nav>
+
+  <% end %>
+
 </div>

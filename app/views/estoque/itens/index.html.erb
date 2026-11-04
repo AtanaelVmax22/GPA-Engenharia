@@ -1,0 +1,119 @@
+<% content_for :page_title do %>
+  Itens rastreáveis
+<% end %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-zinc-100">Itens rastreáveis</h2>
+      <p class="text-sm text-zinc-500">
+        Equipamentos com serial, MAC, patrimônio, garantia e rastreabilidade.
+      </p>
+    </div>
+
+    <% if current_user.admin? %>
+      <%= link_to "Novo item",
+        new_estoque_item_path,
+        class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-lg text-sm" %>
+    <% end %>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+    <%= form_with url: estoque_itens_path, method: :get, class: "grid grid-cols-1 md:grid-cols-4 gap-3" do |form| %>
+      <div class="md:col-span-2">
+        <%= form.text_field :busca,
+          value: @busca,
+          placeholder: "Buscar por produto, serial, MAC, patrimônio, fornecedor ou NF",
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+      </div>
+
+      <div>
+        <%= form.select :status,
+          [["Todos os status", ""]] + Estoque::Item.statuses.keys.map { |status| [status_item_label(status), status] },
+          { selected: @status },
+          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+      </div>
+
+      <div class="flex gap-2">
+        <%= form.submit "Filtrar",
+          class: "px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-100 cursor-pointer" %>
+
+        <%= link_to "Limpar",
+          estoque_itens_path,
+          class: "px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-100" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-zinc-800/70 text-zinc-400">
+        <tr>
+          <th class="px-4 py-3 text-left">Item</th>
+          <th class="px-4 py-3 text-left">Produto</th>
+          <th class="px-4 py-3 text-left">Local</th>
+          <th class="px-4 py-3 text-left">Garantia</th>
+          <th class="px-4 py-3 text-left">Status</th>
+          <th class="px-4 py-3 text-right">Ação</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-zinc-800">
+        <% @itens.each do |item| %>
+          <tr class="hover:bg-zinc-800/40">
+            <td class="px-4 py-3">
+              <div class="text-zinc-100 font-semibold">
+                <%= item.identificacao %>
+              </div>
+
+              <div class="text-xs text-zinc-500">
+                Serial: <%= item.numero_serie.presence || "-" %> |
+                MAC: <%= item.mac.presence || "-" %>
+              </div>
+            </td>
+
+            <td class="px-4 py-3 text-zinc-300">
+              <%= item.produto.nome %>
+            </td>
+
+            <td class="px-4 py-3 text-zinc-400">
+              <%= item.local&.nome || "-" %>
+            </td>
+
+            <td class="px-4 py-3">
+              <%= garantia_badge(item) %>
+
+              <div class="text-xs text-zinc-500 mt-1">
+                Loja: <%= item.garantia_loja_vence_em&.strftime("%d/%m/%Y") || "-" %>
+              </div>
+
+              <div class="text-xs text-zinc-500">
+                Fábrica: <%= item.garantia_fabrica_vence_em&.strftime("%d/%m/%Y") || "-" %>
+              </div>
+            </td>
+
+            <td class="px-4 py-3 text-zinc-300">
+              <%= status_item_label(item.status) %>
+            </td>
+
+            <td class="px-4 py-3 text-right">
+              <%= link_to "Ver",
+                estoque_item_path(item),
+                class: "text-amber-400 hover:text-amber-300 font-semibold" %>
+            </td>
+          </tr>
+        <% end %>
+
+        <% if @itens.empty? %>
+          <tr>
+            <td colspan="6" class="px-4 py-8 text-center text-zinc-500">
+              Nenhum item rastreável encontrado.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <%= render "shared/pagination", pagination: @itens_pagination %>
+  </div>
+</div>

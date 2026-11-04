@@ -1,53 +1,214 @@
-<%= form_with model: [@condominio || historico.condominio, historico], class: "space-y-6" do |f| %>
+
+<% condominio = @condominio || historico.condominio %>
+
+<% formulario_modelo =
+  historico.new_record? ?
+    [condominio, historico] :
+    historico
+%>
+
+<%= form_with model: formulario_modelo,
+  class: "gpa-form",
+  multipart: true do |f| %>
+
+  <!-- ERROS -->
   <% if historico.errors.any? %>
-    <div class="bg-red-900/50 border border-red-700 rounded-xl p-4 text-red-300 text-sm">
-      <% historico.errors.full_messages.each do |msg| %><div>&bull; <%= msg %></div><% end %>
+    <div class="gpa-form-errors" role="alert">
+      <strong>
+        Não foi possível salvar o atendimento.
+      </strong>
+
+      <ul>
+        <% historico.errors.full_messages.each do |mensagem| %>
+          <li><%= mensagem %></li>
+        <% end %>
+      </ul>
     </div>
   <% end %>
 
-  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
-    <h2 class="text-base font-semibold text-amber-400">Registro Técnico</h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <!-- INFORMAÇÕES -->
+  <section class="gpa-panel">
+    <div class="gpa-panel-header">
       <div>
-        <%= f.label :tipo, "Tipo de Atendimento", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.select :tipo, HistoricoTecnico.tipos.keys.map { |t| [t.humanize, t] },
-            {}, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div>
-        <%= f.label :status, "Status", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.select :status, HistoricoTecnico.statuses.keys.map { |s| [s.humanize, s] },
-            {}, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div class="md:col-span-2">
-        <%= f.label :titulo, "Título", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :titulo, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500", placeholder: "Manutenção preventiva realizada" %>
-      </div>
-      <div>
-        <%= f.label :equipamento_id, "Equipamento (opcional)", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.select :equipamento_id,
-            ((@condominio || historico.condominio)&.equipamentos&.map { |e| [e.nome, e.id] } || []),
-            { include_blank: "Nenhum / Geral" },
-            class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div>
-        <%= f.label :data_atendimento, "Data/Hora", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.datetime_local_field :data_atendimento, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div class="md:col-span-2">
-        <%= f.label :descricao, "Descrição do Serviço", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_area :descricao, rows: 5, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500 resize-none", placeholder: "Descreva o serviço realizado..." %>
-      </div>
-      <div class="md:col-span-2">
-        <%= f.label :pecas_utilizadas, "Peças Utilizadas", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_area :pecas_utilizadas, rows: 2, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500 resize-none", placeholder: "Ex: Óleo lubrificante - 1 unidade" %>
+        <h2 class="gpa-panel-title">Registro Técnico</h2>
+        <p class="gpa-panel-subtitle">
+          Informações do atendimento realizado.
+        </p>
       </div>
     </div>
+
+    <div class="gpa-form-grid">
+
+      <div class="gpa-field">
+        <%= f.label :tipo, "Tipo de Atendimento",
+          class: "gpa-form-label" %>
+
+        <%= f.select :tipo,
+          HistoricoTecnico.tipos.keys.map { |tipo|
+            [tipo.humanize, tipo]
+          },
+          {},
+          class: "gpa-input gpa-select" %>
+      </div>
+
+      <div class="gpa-field">
+        <%= f.label :status, "Status",
+          class: "gpa-form-label" %>
+
+        <%= f.select :status,
+          HistoricoTecnico.statuses.keys.map { |status|
+            [status.humanize, status]
+          },
+          {},
+          class: "gpa-input gpa-select" %>
+      </div>
+
+      <div class="gpa-field gpa-field-full">
+        <%= f.label :titulo, "Título do Atendimento",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :titulo,
+          class: "gpa-input",
+          placeholder: "Ex.: Manutenção preventiva realizada" %>
+      </div>
+
+      <div class="gpa-field">
+        <%= f.label :equipamento_id, "Equipamento",
+          class: "gpa-form-label" %>
+
+        <%= f.select :equipamento_id,
+          condominio.equipamentos.map { |e|
+            [e.nome, e.id]
+          },
+          { include_blank: "Nenhum / Atendimento geral" },
+          class: "gpa-input gpa-select" %>
+      </div>
+
+      <div class="gpa-field">
+        <%= f.label :data_atendimento, "Data e Hora",
+          class: "gpa-form-label" %>
+
+        <%= f.datetime_local_field :data_atendimento,
+          class: "gpa-input" %>
+      </div>
+
+      <div class="gpa-field gpa-field-full">
+        <%= f.label :descricao, "Descrição do Serviço",
+          class: "gpa-form-label" %>
+
+        <%= f.text_area :descricao,
+          rows: 6,
+          class: "gpa-input gpa-textarea",
+          placeholder: "Descreva o serviço realizado..." %>
+      </div>
+
+      <div class="gpa-field gpa-field-full">
+        <%= f.label :pecas_utilizadas, "Peças Utilizadas",
+          class: "gpa-form-label" %>
+
+        <%= f.text_area :pecas_utilizadas,
+          rows: 3,
+          class: "gpa-input gpa-textarea",
+          placeholder: "Informe as peças e quantidades utilizadas..." %>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOTOS -->
+  <section class="gpa-panel">
+
+    <div class="gpa-panel-header">
+      <div>
+        <h2 class="gpa-panel-title">
+          Evidências Fotográficas
+        </h2>
+
+        <p class="gpa-panel-subtitle">
+          Anexe fotos do equipamento, local ou serviço.
+        </p>
+      </div>
+    </div>
+
+    <% if historico.persisted? && historico.fotos.attached? %>
+      <div class="gpa-photo-existing">
+        <h3>Fotos já cadastradas</h3>
+
+        <div class="gpa-photo-grid">
+          <% historico.fotos.attachments.select(&:persisted?).each do |foto| %>
+
+            <!-- Preserva as fotos já anexadas -->
+            <%= f.hidden_field :fotos,
+              multiple: true,
+              value: foto.blob.signed_id %>
+
+            <div class="gpa-photo-card">
+
+              <%= link_to url_for(foto),
+                target: "_blank",
+                rel: "noopener noreferrer" do %>
+
+                <%= image_tag foto,
+                  class: "gpa-photo-image",
+                  loading: "lazy",
+                  alt: "Foto do atendimento" %>
+
+              <% end %>
+
+              <div class="gpa-photo-caption">
+                <%= foto.filename.to_s %>
+              </div>
+
+            </div>
+          <% end %>
+        </div>
+
+        <p class="gpa-photo-hint">
+          As fotos existentes serão preservadas.
+          Para excluir uma foto, abra os detalhes
+          do atendimento.
+        </p>
+      </div>
+    <% end %>
+
+    <div class="gpa-upload-area">
+
+      <div class="gpa-upload-icon">
+        <%= gpa_icon(:plus) %>
+      </div>
+
+      <%= f.label :fotos, "Adicionar fotos",
+        class: "gpa-form-label" %>
+
+      <%= f.file_field :fotos,
+        multiple: true,
+        accept: "image/jpeg,image/png,image/webp",
+        class: "gpa-file-input" %>
+
+      <p class="gpa-photo-hint">
+        Selecione fotos da câmera ou galeria.
+        Formatos: JPG, PNG e WebP.
+        Máximo de 10 MB por foto e 10 fotos por atendimento.
+      </p>
+
+    </div>
+
+  </section>
+
+  <!-- AÇÕES -->
+  <div class="gpa-form-footer">
+    <%= f.submit(
+      historico.new_record? ?
+        "Registrar Atendimento" :
+        "Salvar Alterações",
+      class: "gpa-btn gpa-btn-primary"
+    ) %>
+
+    <%= link_to "Cancelar",
+      historico.new_record? ?
+        condominio_path(condominio) :
+        historico_tecnico_path(historico),
+      class: "gpa-btn gpa-btn-secondary" %>
   </div>
 
-  <div class="flex gap-3">
-    <%= f.submit historico.new_record? ? "Registrar Atendimento" : "Salvar Alterações",
-        class: "px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold rounded-xl text-sm cursor-pointer transition-colors" %>
-    <%= link_to "Cancelar", :back, class: "px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl text-sm transition-colors" %>
-  </div>
 <% end %>

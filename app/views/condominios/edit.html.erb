@@ -1,2 +1,24 @@
-<% content_for :page_title, "Editar: #{@condominio.nome}" %>
-<%= render "form", condominio: @condominio %>
+
+<% content_for :page_title, "Editar Condomínio" %>
+
+<div class="gpa-module gpa-form-page">
+
+  <%= link_to condominio_path(@condominio),
+    class: "gpa-back-link" do %>
+    <span>←</span>
+    Voltar aos detalhes
+  <% end %>
+
+  <div class="gpa-module-header">
+    <div class="gpa-module-heading">
+      <h2>Editar Condomínio</h2>
+      <p>
+        Atualize as informações de
+        <strong><%= @condominio.nome %></strong>.
+      </p>
+    </div>
+  </div>
+
+  <%= render "form", condominio: @condominio %>
+
+</div>

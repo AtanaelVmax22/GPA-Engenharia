@@ -1,62 +1,184 @@
+
 <% content_for :page_title, "Condomínios" %>
 
-<div class="flex items-center justify-between mb-6">
-  <div></div>
-  <%= link_to "+ Novo Condomínio", new_condominio_path, class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold rounded-xl text-sm transition-colors" %>
-</div>
+<div class="gpa-module">
 
-<!-- Filters -->
-<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 mb-6">
-  <%= form_with url: condominios_path, method: :get, class: "flex gap-3 flex-wrap" do |f| %>
-    <%= f.text_field :q, value: params[:q], placeholder: "Buscar condomínio...",
-        class: "flex-1 min-w-48 px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500" %>
-    <%= f.select :status, [["Todos os status", ""], ["Ativos", "ativo"], ["Inativos", "inativo"]],
-        { selected: params[:status] },
-        class: "px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-    <%= f.submit "Buscar", class: "px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-zinc-100 rounded-xl text-sm cursor-pointer transition-colors" %>
-  <% end %>
-</div>
-
-<!-- Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
-  <% @condominios.each do |c| %>
-    <div class="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-5 transition-colors">
-      <div class="flex items-start justify-between mb-3">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-bold text-sm">
-            ⌂
-          </div>
-          <div>
-            <h3 class="font-semibold text-zinc-100 text-sm leading-tight"><%= c.nome %></h3>
-            <p class="text-xs text-zinc-500"><%= c.cidade %>, <%= c.estado %></p>
-          </div>
-        </div>
-        <%= status_badge(c.status) %>
-      </div>
-
-      <div class="text-xs text-zinc-500 space-y-1 mb-4">
-        <div><span class="text-zinc-600">Síndico:</span> <%= c.sindico_nome.presence || "—" %></div>
-        <div><span class="text-zinc-600">Unidades:</span> <%= c.unidades || "—" %></div>
-        <div><span class="text-zinc-600">Equip.:</span> <%= c.equipamentos.count %></div>
-        <% if c.ultima_visita %>
-          <div><span class="text-zinc-600">Última visita:</span> <%= c.ultima_visita.strftime("%d/%m/%Y") %></div>
-        <% end %>
-      </div>
-
-      <div class="flex gap-2">
-        <%= link_to "Ver detalhes", c, class: "flex-1 text-center px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs transition-colors" %>
-        <%= link_to "Editar", edit_condominio_path(c), class: "px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs transition-colors" %>
-      </div>
+  <!-- Cabeçalho -->
+  <div class="gpa-module-header">
+    <div class="gpa-module-heading">
+      <h2>Gestão de Condomínios</h2>
+      <p>
+        Consulte e gerencie os condomínios cadastrados,
+        seus equipamentos e informações técnicas.
+      </p>
     </div>
-  <% end %>
-</div>
 
-<% if @condominios.empty? %>
-  <div class="text-center py-16 text-zinc-600">
-    <div class="text-4xl mb-3">⌂</div>
-    <p>Nenhum condomínio encontrado.</p>
-    <%= link_to "Cadastrar primeiro condomínio", new_condominio_path, class: "text-amber-400 hover:text-amber-300 text-sm mt-2 inline-block" %>
+    <%= link_to new_condominio_path,
+      class: "gpa-btn gpa-btn-primary" do %>
+      <%= gpa_icon(:plus) %>
+      <span>Novo Condomínio</span>
+    <% end %>
   </div>
-<% end %>
 
-<%== pagy_nav(@pagy) if @pagy.pages > 1 rescue nil %>
+  <!-- Pesquisa e filtros -->
+  <section class="gpa-panel gpa-filter-panel">
+    <%= form_with url: condominios_path,
+      method: :get,
+      class: "gpa-filter-form" do |f| %>
+
+      <div class="gpa-filter-search">
+        <%= f.label :q, "Buscar condomínio",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :q,
+          value: params[:q],
+          placeholder: "Buscar pelo nome do condomínio...",
+          class: "gpa-input",
+          autocomplete: "off" %>
+      </div>
+
+      <div class="gpa-filter-status">
+        <%= f.label :status, "Situação",
+          class: "gpa-form-label" %>
+
+        <%= f.select :status,
+          [
+            ["Todos os status", ""],
+            ["Ativos", "ativo"],
+            ["Inativos", "inativo"]
+          ],
+          { selected: params[:status] },
+          class: "gpa-input gpa-select" %>
+      </div>
+
+      <div class="gpa-filter-actions">
+        <%= f.submit "Buscar",
+          class: "gpa-btn gpa-btn-primary" %>
+
+        <%= link_to "Limpar",
+          condominios_path,
+          class: "gpa-btn gpa-btn-secondary" %>
+      </div>
+    <% end %>
+  </section>
+
+  <!-- Quantidade na página atual -->
+  <div class="gpa-results-heading">
+    <h3>Condomínios encontrados</h3>
+    <span class="gpa-count-badge">
+      <%= @condominios.size %> nesta página
+    </span>
+  </div>
+
+  <!-- Lista de cartões -->
+  <% if @condominios.any? %>
+
+    <div class="gpa-condominio-grid">
+      <% @condominios.each do |condominio| %>
+
+        <article class="gpa-condominio-card">
+
+          <div class="gpa-condominio-card-top">
+            <span class="gpa-condominio-icon">
+              <%= gpa_icon(:building) %>
+            </span>
+
+            <div class="gpa-condominio-identification">
+              <h3>
+                <%= link_to condominio.nome,
+                  condominio_path(condominio),
+                  class: "gpa-condominio-name" %>
+              </h3>
+
+              <p>
+                <%= [
+                  condominio.cidade.presence,
+                  condominio.estado.presence
+                ].compact.join(", ").presence || "Localização não informada" %>
+              </p>
+            </div>
+          </div>
+
+          <div class="gpa-condominio-status">
+            <%= status_badge(condominio.status) %>
+          </div>
+
+          <!-- Informações -->
+          <dl class="gpa-condominio-details">
+            <div>
+              <dt>Síndico</dt>
+              <dd>
+                <%= condominio.sindico_nome.presence || "Não informado" %>
+              </dd>
+            </div>
+
+            <div>
+              <dt>Unidades</dt>
+              <dd><%= condominio.unidades || "—" %></dd>
+            </div>
+
+            <div>
+              <dt>Equipamentos</dt>
+              <dd><%= condominio.equipamentos.count %></dd>
+            </div>
+
+            <div>
+              <dt>Última visita</dt>
+              <dd>
+                <%= condominio.ultima_visita ?
+                  l(condominio.ultima_visita, format: :short) :
+                  "Não registrada" %>
+              </dd>
+            </div>
+          </dl>
+
+          <!-- Ações -->
+          <div class="gpa-condominio-actions">
+            <%= link_to condominio_path(condominio),
+              class: "gpa-btn gpa-btn-secondary gpa-card-main-action" do %>
+
+              <span>Ver detalhes</span>
+              <%= gpa_icon(:arrow) %>
+            <% end %>
+
+            <%= link_to edit_condominio_path(condominio),
+              class: "gpa-btn gpa-btn-outline" do %>
+              <%= gpa_icon(:edit) %>
+              <span>Editar</span>
+            <% end %>
+          </div>
+
+        </article>
+      <% end %>
+    </div>
+
+  <% else %>
+
+    <!-- Estado vazio -->
+    <div class="gpa-empty-state">
+      <div class="gpa-empty-icon">
+        <%= gpa_icon(:building) %>
+      </div>
+
+      <h3>Nenhum condomínio encontrado</h3>
+
+      <p>
+        Não encontramos condomínios com os filtros
+        selecionados.
+      </p>
+
+      <%= link_to "Cadastrar condomínio",
+        new_condominio_path,
+        class: "gpa-btn gpa-btn-primary" %>
+    </div>
+
+  <% end %>
+
+  <!-- Paginação -->
+  <% if @pagy && @pagy.pages > 1 %>
+    <nav class="gpa-pagination" aria-label="Paginação de condomínios">
+      <%== pagy_nav(@pagy) %>
+    </nav>
+  <% end %>
+
+</div>

@@ -1,0 +1,72 @@
+<% content_for :page_title do %>
+  Produtos do Estoque
+<% end %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-zinc-100">Produtos</h2>
+      <p class="text-sm text-zinc-500">Cadastro mestre dos materiais e equipamentos.</p>
+    </div>
+
+    <% if current_user.admin? %>
+      <%= link_to "Novo produto", new_estoque_produto_path,
+        class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold rounded-lg text-sm" %>
+    <% end %>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-zinc-800/70 text-zinc-400">
+        <tr>
+          <th class="px-4 py-3 text-left">Produto</th>
+          <th class="px-4 py-3 text-left">Categoria</th>
+          <th class="px-4 py-3 text-left">Unidade</th>
+          <% if current_user.admin? %>
+            <th class="px-4 py-3 text-left">Custo</th>
+          <% end %>
+          <th class="px-4 py-3 text-right">Ações</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-zinc-800">
+        <% @produtos.each do |produto| %>
+          <tr class="hover:bg-zinc-800/40">
+            <td class="px-4 py-3">
+              <div class="font-semibold text-zinc-100"><%= produto.nome %></div>
+              <div class="text-xs text-zinc-500">
+                <%= produto.marca %> <%= produto.modelo %>
+              </div>
+            </td>
+
+            <td class="px-4 py-3 text-zinc-400"><%= produto.categoria.presence || "-" %></td>
+            <td class="px-4 py-3 text-zinc-400"><%= produto.unidade_medida %></td>
+
+            <% if current_user.admin? %>
+              <td class="px-4 py-3 text-zinc-400">
+                <%= produto.valor_custo.present? ? number_to_currency(produto.valor_custo, unit: "R$ ", separator: ",", delimiter: ".") : "-" %>
+              </td>
+            <% end %>
+
+            <td class="px-4 py-3 text-right space-x-2">
+              <%= link_to "Abrir", estoque_produto_path(produto), class: "text-amber-400 hover:text-amber-300" %>
+
+              <% if current_user.admin? %>
+                <%= link_to "Editar", edit_estoque_produto_path(produto), class: "text-zinc-400 hover:text-zinc-200" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+
+        <% if @produtos.empty? %>
+          <tr>
+            <td colspan="5" class="px-4 py-6 text-center text-zinc-500">
+              Nenhum produto cadastrado.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <%= render "shared/pagination", pagination: @produtos_pagination %>
+  </div>
+</div>

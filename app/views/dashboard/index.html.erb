@@ -1,64 +1,203 @@
+
 <% content_for :page_title, "Dashboard Executivo" %>
 
-<!-- Stats cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-  <%= render "dashboard/stat_card", label: "Condomínios", value: @total_condominios, sub: "Cadastro ativo", icon: "⌂", color: "amber" %>
-  <%= render "dashboard/stat_card", label: "Equipamentos", value: @total_equipamentos, sub: "Instalados", icon: "⚙", color: "blue" %>
-  <%= render "dashboard/stat_card", label: "Ordens Técnicas", value: @ordens_mes, sub: "Últimos 30 dias", icon: "✓", color: "emerald" %>
-  <%= render "dashboard/stat_card", label: "Pendências", value: @pendencias, sub: "Em andamento", icon: "⏱", color: "red" %>
-</div>
+<div class="gpa-section">
 
-<!-- Charts and recent activity -->
-<div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
-  <!-- Chart -->
-  <div class="xl:col-span-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-    <h2 class="text-base font-semibold text-zinc-100 mb-4">Ordens Técnicas &mdash; Últimos 6 Meses</h2>
-    <div class="h-48 flex items-end gap-2">
+  <!-- APRESENTAÇÃO -->
+  <div class="gpa-dashboard-intro">
+    <div>
+      <h2>Visão geral</h2>
+      <p>
+        Acompanhe os principais indicadores
+        e as atividades técnicas.
+      </p>
+    </div>
+  </div>
+
+  <!-- INDICADORES -->
+  <section
+    class="gpa-stat-grid"
+    aria-label="Indicadores principais"
+  >
+    <%= render "dashboard/stat_card",
+      label: "Condomínios",
+      value: @total_condominios,
+      sub: "Cadastro ativo",
+      icon: :building,
+      color: "amber" %>
+
+    <%= render "dashboard/stat_card",
+      label: "Equipamentos",
+      value: @total_equipamentos,
+      sub: "Instalados",
+      icon: :package,
+      color: "blue" %>
+
+    <%= render "dashboard/stat_card",
+      label: "Ordens Técnicas",
+      value: @ordens_mes,
+      sub: "Últimos 30 dias",
+      icon: :check,
+      color: "emerald" %>
+
+    <%= render "dashboard/stat_card",
+      label: "Pendências",
+      value: @pendencias,
+      sub: "Em andamento",
+      icon: :clock,
+      color: "red" %>
+  </section>
+
+  <!-- GRÁFICO E ATIVIDADES -->
+  <div class="gpa-dashboard-columns">
+
+    <!-- GRÁFICO -->
+    <section class="gpa-panel" aria-labelledby="chart-title">
+      <div class="gpa-panel-header">
+        <div>
+          <h2 id="chart-title" class="gpa-panel-title">
+            Ordens Técnicas
+          </h2>
+          <p class="gpa-panel-subtitle">
+            Últimos 6 meses
+          </p>
+        </div>
+      </div>
+
       <% months = @ordens_por_mes || {} %>
-      <% max_val = [months.values.max.to_i, 1].max %>
-      <% 6.downto(1).each do |n| %>
-        <% month = n.months.ago.strftime("%b/%y") %>
-        <% val = months[n.months.ago.beginning_of_month] || 0 %>
-        <% height = (val.to_f / max_val * 100).round %>
-        <div class="flex-1 flex flex-col items-center gap-1">
-          <span class="text-xs text-zinc-500"><%= val %></span>
-          <div class="w-full bg-amber-500 rounded-t opacity-80 hover:opacity-100 transition-opacity" style="height: <%= [height, 4].max %>%"></div>
-          <span class="text-xs text-zinc-500"><%= month %></span>
-        </div>
-      <% end %>
-    </div>
-  </div>
 
-  <!-- Recent activity -->
-  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-    <h2 class="text-base font-semibold text-zinc-100 mb-4">Atividades Recentes</h2>
-    <div class="space-y-3">
-      <% @historicos_recentes.each do |h| %>
-        <div class="flex items-start gap-3">
-          <div class="w-2 h-2 rounded-full bg-amber-400 mt-1.5 flex-shrink-0"></div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm text-zinc-300 truncate"><%= h.titulo %></p>
-            <p class="text-xs text-zinc-500"><%= h.condominio.nome %> &mdash; <%= time_ago_in_words(h.created_at) %> atrás</p>
+      <% periods = (5.downto(0)).map do |n|
+        n.months.ago.beginning_of_month
+      end %>
+
+      <% values = periods.map do |period|
+        (
+          months[period] ||
+          months[period.to_date] ||
+          0
+        ).to_i
+      end %>
+
+      <% max_val = [values.max.to_i, 1].max %>
+
+      <div
+        class="gpa-chart"
+        role="img"
+        aria-label="<%= "Ordens técnicas por mês: " + periods.each_with_index.map { |period, i| "#{period.strftime('%m/%Y')}: #{values[i]}" }.join(', ') %>"
+      >
+        <% periods.each_with_index do |period, i| %>
+
+          <% height =
+            values[i].zero? ?
+              0 :
+              [((values[i].to_f / max_val) * 100).round, 3].max
+          %>
+
+          <div class="gpa-chart-item">
+
+            <span class="gpa-chart-number">
+              <%= values[i] %>
+            </span>
+
+            <div class="gpa-chart-track">
+              <div
+                class="gpa-chart-bar"
+                style="--bar-height: <%= height %>%"
+                title="<%= period.strftime('%m/%Y') %>: <%= values[i] %> ordens"
+              ></div>
+            </div>
+
+            <span class="gpa-chart-label">
+              <%= period.strftime("%m/%y") %>
+            </span>
           </div>
-        </div>
-      <% end %>
-      <% if @historicos_recentes.empty? %>
-        <p class="text-sm text-zinc-600">Nenhuma atividade recente.</p>
+
+        <% end %>
+      </div>
+    </section>
+
+    <!-- ATIVIDADES RECENTES -->
+    <section
+      class="gpa-panel"
+      aria-labelledby="activity-title"
+    >
+      <div class="gpa-panel-header">
+        <h2 id="activity-title" class="gpa-panel-title">
+          Atividades Recentes
+        </h2>
+      </div>
+
+      <div class="gpa-activity-list">
+
+        <% @historicos_recentes.each do |h| %>
+          <div class="gpa-activity-item">
+
+            <span
+              class="gpa-activity-dot"
+              aria-hidden="true"
+            ></span>
+
+            <div class="min-w-0">
+              <p class="gpa-activity-title">
+                <%= h.titulo %>
+              </p>
+
+              <p class="gpa-activity-meta">
+                <%= h.condominio&.nome || "Condomínio não informado" %>
+                · há <%= time_ago_in_words(h.created_at) %>
+              </p>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @historicos_recentes.empty? %>
+          <p class="gpa-empty">
+            Nenhuma atividade recente.
+          </p>
+        <% end %>
+      </div>
+    </section>
+  </div>
+
+  <!-- ACESSOS RÁPIDOS -->
+  <section
+    class="gpa-panel"
+    aria-labelledby="quick-title"
+  >
+    <div class="gpa-panel-header">
+      <h2 id="quick-title" class="gpa-panel-title">
+        Acesso Rápido
+      </h2>
+    </div>
+
+    <div class="gpa-quick-grid">
+
+      <%= render "dashboard/quick_link",
+        label: "Cadastro de Condomínios",
+        path: condominios_path,
+        icon: :building %>
+
+      <%= render "dashboard/quick_link",
+        label: "Novo Condomínio",
+        path: new_condominio_path,
+        icon: :plus %>
+
+      <%= render "dashboard/quick_link",
+        label: "Feed Técnico",
+        path: post_tecnicos_path,
+        icon: :feed %>
+
+      <%= render "dashboard/quick_link",
+        label: "Novo Post",
+        path: new_post_tecnico_path,
+        icon: :edit %>
+
+      <% if current_user.admin? %>
+        <%= render "dashboard/quick_link",
+          label: "Gestão de Usuários",
+          path: admin_users_path,
+          icon: :users %>
       <% end %>
     </div>
-  </div>
-</div>
-
-<!-- Quick access -->
-<div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-  <h2 class="text-base font-semibold text-zinc-100 mb-4">Acesso Rápido</h2>
-  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-    <%= render "dashboard/quick_link", label: "Cadastro de Condomínios", path: condominios_path, icon: "⌂" %>
-    <%= render "dashboard/quick_link", label: "Novo Condomínio", path: new_condominio_path, icon: "+" %>
-    <%= render "dashboard/quick_link", label: "Feed Técnico", path: post_tecnicos_path, icon: "◈" %>
-    <%= render "dashboard/quick_link", label: "Novo Post", path: new_post_tecnico_path, icon: "✎" %>
-    <% if current_user.admin? %>
-      <%= render "dashboard/quick_link", label: "Gestão de Usuários", path: admin_users_path, icon: "◎" %>
-    <% end %>
-  </div>
+  </section>
 </div>

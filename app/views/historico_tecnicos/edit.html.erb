@@ -1,2 +1,31 @@
-<% content_for :page_title, "Editar Registro" %>
-<%= render "form", historico: @historico %>
+
+<% content_for :page_title, "Editar Registro Técnico" %>
+
+<div class="gpa-module gpa-form-page">
+
+  <%= link_to historico_tecnico_path(@historico),
+    class: "gpa-back-link" do %>
+
+    <span>←</span>
+    <span>Voltar aos Detalhes</span>
+
+  <% end %>
+
+  <div class="gpa-module-header">
+
+    <div class="gpa-module-heading">
+
+      <h2>Editar Atendimento</h2>
+
+      <p>
+        Atualize o registro técnico
+        <strong><%= @historico.titulo %></strong>.
+      </p>
+
+    </div>
+
+  </div>
+
+  <%= render "form", historico: @historico %>
+
+</div>

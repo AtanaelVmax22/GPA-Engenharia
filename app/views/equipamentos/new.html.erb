@@ -1,3 +1,29 @@
+
 <% content_for :page_title, "Novo Equipamento" %>
-<%= link_to "← #{@condominio.nome}", @condominio, class: "text-sm text-zinc-500 hover:text-zinc-300 block mb-6" %>
-<%= render "form", equipamento: @equipamento %>
+
+<div class="gpa-module gpa-form-page">
+
+  <%= link_to condominio_path(@condominio),
+    class: "gpa-back-link" do %>
+
+    <span>←</span>
+    <span>Voltar para <%= @condominio.nome %></span>
+
+  <% end %>
+
+  <div class="gpa-module-header">
+
+    <div class="gpa-module-heading">
+      <h2>Cadastrar Equipamento</h2>
+
+      <p>
+        Adicione um novo equipamento técnico ao condomínio
+        <strong><%= @condominio.nome %></strong>.
+      </p>
+    </div>
+
+  </div>
+
+  <%= render "form", equipamento: @equipamento %>
+
+</div>

@@ -1,0 +1,120 @@
+<% content_for :page_title do %>
+  <%= @item.identificacao %>
+<% end %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-zinc-100"><%= @item.identificacao %></h2>
+      <p class="text-sm text-zinc-500">
+        <%= @item.produto.nome %>
+      </p>
+    </div>
+
+    <div class="flex gap-2">
+      <%= link_to "Voltar",
+        estoque_itens_path,
+        class: "px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-100" %>
+
+      <% if current_user.admin? %>
+        <%= link_to "Editar",
+          edit_estoque_item_path(@item),
+          class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-lg text-sm" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+      <div class="text-zinc-500 text-sm">Status</div>
+      <div class="text-zinc-100 font-bold mt-1"><%= status_item_label(@item.status) %></div>
+    </div>
+
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+      <div class="text-zinc-500 text-sm">Garantia</div>
+      <div class="mt-2"><%= garantia_badge(@item) %></div>
+    </div>
+
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+      <div class="text-zinc-500 text-sm">Local atual</div>
+      <div class="text-zinc-100 font-bold mt-1"><%= @item.local&.nome || "-" %></div>
+    </div>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4">
+    <h3 class="text-zinc-100 font-bold">Identificação</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+      <div>
+        <div class="text-zinc-500">Código patrimônio</div>
+        <div class="text-zinc-100"><%= @item.codigo_patrimonio.presence || "-" %></div>
+      </div>
+
+      <div>
+        <div class="text-zinc-500">Número de série</div>
+        <div class="text-zinc-100"><%= @item.numero_serie.presence || "-" %></div>
+      </div>
+
+      <div>
+        <div class="text-zinc-500">MAC</div>
+        <div class="text-zinc-100"><%= @item.mac.presence || "-" %></div>
+      </div>
+
+      <div>
+        <div class="text-zinc-500">Produto</div>
+        <div class="text-zinc-100"><%= @item.produto.nome %></div>
+      </div>
+
+      <div>
+        <div class="text-zinc-500">Condomínio ID</div>
+        <div class="text-zinc-100"><%= @item.condominio_id.presence || "-" %></div>
+      </div>
+
+      <div>
+        <div class="text-zinc-500">Data instalação</div>
+        <div class="text-zinc-100"><%= @item.data_instalacao&.strftime("%d/%m/%Y") || "-" %></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-4">
+    <h3 class="text-zinc-100 font-bold">Compra e garantia</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+      <div>
+        <div class="text-zinc-500">Fornecedor</div>
+        <div class="text-zinc-100"><%= @item.fornecedor_nome.presence || "-" %></div>
+      </div>
+
+      <div>
+        <div class="text-zinc-500">Nota fiscal</div>
+        <div class="text-zinc-100"><%= @item.nota_fiscal_numero.presence || "-" %></div>
+      </div>
+
+      <div>
+        <div class="text-zinc-500">Data compra</div>
+        <div class="text-zinc-100"><%= @item.data_compra&.strftime("%d/%m/%Y") || "-" %></div>
+      </div>
+
+      <div>
+        <div class="text-zinc-500">Garantia loja</div>
+        <div class="text-zinc-100"><%= @item.garantia_loja_status %></div>
+        <div class="text-xs text-zinc-500"><%= @item.garantia_loja_dias %> dias</div>
+      </div>
+
+      <div>
+        <div class="text-zinc-500">Garantia fábrica</div>
+        <div class="text-zinc-100"><%= @item.garantia_fabrica_status %></div>
+        <div class="text-xs text-zinc-500"><%= @item.garantia_fabrica_meses %> meses</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+    <h3 class="text-zinc-100 font-bold mb-2">Observação</h3>
+
+    <div class="text-sm text-zinc-300 whitespace-pre-line">
+      <%= @item.observacao.presence || "Sem observações." %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,110 @@
+<% content_for :page_title do %>
+  <%= @produto.nome %>
+<% end %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-zinc-100"><%= @produto.nome %></h2>
+      <p class="text-sm text-zinc-500"><%= @produto.categoria.presence || "Produto do estoque" %></p>
+    </div>
+
+    <div class="flex gap-2">
+      <%= link_to "QR Code", qr_estoque_produto_path(@produto), class: "px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm" %>
+
+      <% if current_user.admin? %>
+        <%= link_to "Editar", edit_estoque_produto_path(@produto), class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold rounded-lg text-sm" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="md:col-span-2 bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-3">
+      <div class="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <div class="text-zinc-500">Código</div>
+          <div class="text-zinc-100"><%= @produto.codigo.presence || "-" %></div>
+        </div>
+
+        <div>
+          <div class="text-zinc-500">Unidade</div>
+          <div class="text-zinc-100"><%= @produto.unidade_medida %></div>
+        </div>
+
+        <div>
+          <div class="text-zinc-500">Marca</div>
+          <div class="text-zinc-100"><%= @produto.marca.presence || "-" %></div>
+        </div>
+
+        <div>
+          <div class="text-zinc-500">Modelo</div>
+          <div class="text-zinc-100"><%= @produto.modelo.presence || "-" %></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="text-zinc-500 text-sm">Descrição</div>
+        <div class="text-zinc-300 text-sm mt-1"><%= simple_format(@produto.descricao.presence || "-") %></div>
+      </div>
+    </div>
+
+    <% if current_user.admin? %>
+      <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+        <h3 class="font-bold text-zinc-100 mb-4">Valores</h3>
+
+        <div class="space-y-3 text-sm">
+          <div>
+            <div class="text-zinc-500">Custo</div>
+            <div class="text-amber-400 font-semibold">
+              <%= @produto.valor_custo.present? ? number_to_currency(@produto.valor_custo, unit: "R$ ", separator: ",", delimiter: ".") : "-" %>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-zinc-500">Venda/Interno</div>
+            <div class="text-amber-400 font-semibold">
+              <%= @produto.valor_venda.present? ? number_to_currency(@produto.valor_venda, unit: "R$ ", separator: ",", delimiter: ".") : "-" %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+    <div class="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
+      <h3 class="font-bold text-zinc-100">Saldo por estoque</h3>
+     <%= link_to "Movimentar",
+  new_estoque_movimentacao_path(produto_id: @produto.id),
+  class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold rounded-lg text-sm" %>
+    </div>
+
+    <table class="w-full text-sm">
+      <thead class="bg-zinc-800/70 text-zinc-400">
+        <tr>
+          <th class="px-4 py-3 text-left">Estoque</th>
+          <th class="px-4 py-3 text-left">Tipo</th>
+          <th class="px-4 py-3 text-right">Quantidade</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-zinc-800">
+        <% @saldos.each do |saldo| %>
+          <tr>
+            <td class="px-4 py-3 text-zinc-100"><%= saldo.local.nome %></td>
+            <td class="px-4 py-3 text-zinc-400"><%= saldo.local.tipo.humanize %></td>
+            <td class="px-4 py-3 text-right text-amber-400 font-semibold"><%= formatar_quantidade(saldo.quantidade) %></td>
+          </tr>
+        <% end %>
+
+        <% if @saldos.empty? %>
+          <tr>
+            <td colspan="3" class="px-4 py-6 text-center text-zinc-500">
+              Este produto ainda não possui saldo em nenhum estoque.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

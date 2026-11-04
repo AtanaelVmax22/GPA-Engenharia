@@ -10,8 +10,17 @@ class User < ApplicationRecord
   has_many :checklists, dependent: :destroy
 
   validates :nome, presence: true
+  validates :role, presence: true
 
-  def admin?
-    role == "admin"
+  before_validation :set_default_role, on: :create
+
+  def nome_para_select
+    nome.presence || email
+  end
+
+  private
+
+  def set_default_role
+    self.role ||= :tecnico
   end
 end

@@ -1,0 +1,128 @@
+<% content_for :page_title do %>
+  <%= @local.nome %>
+<% end %>
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-zinc-100"><%= @local.nome %></h2>
+      <p class="text-sm text-zinc-500 capitalize"><%= @local.tipo.humanize %></p>
+    </div>
+
+    <div class="flex flex-wrap gap-2 justify-end">
+      <%= link_to "QR Code",
+        qr_estoque_local_path(@local),
+        class: "px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-100" %>
+
+      <%= link_to "Movimentar",
+        new_estoque_movimentacao_path(origem_local_id: @local.id),
+        class: "px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-semibold rounded-lg text-sm" %>
+
+      <%= link_to "Receber transferências",
+        estoque_local_recebimentos_path(@local),
+        class: "px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold rounded-lg text-sm" %>
+
+      <% if current_user.admin? %>
+        <%= link_to "Editar",
+          edit_estoque_local_path(@local),
+          class: "px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-100" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+    <div>
+      <div class="text-zinc-500">Cidade</div>
+      <div class="text-zinc-100"><%= @local.cidade.presence || "-" %></div>
+    </div>
+
+    <div>
+      <div class="text-zinc-500">Bairro</div>
+      <div class="text-zinc-100"><%= @local.bairro.presence || "-" %></div>
+    </div>
+
+    <div>
+      <div class="text-zinc-500">Responsáveis</div>
+
+      <% responsaveis = @local.respond_to?(:responsaveis) ? @local.responsaveis.to_a : [] %>
+      <% responsaveis = [@local.responsavel].compact if responsaveis.empty? && @local.respond_to?(:responsavel) %>
+
+      <% if responsaveis.any? %>
+        <div class="space-y-1">
+          <% responsaveis.each do |responsavel| %>
+            <div class="text-zinc-100">
+              <%= responsavel.nome.presence || responsavel.email %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-zinc-100">-</div>
+      <% end %>
+    </div>
+
+    <div class="md:col-span-3">
+      <div class="text-zinc-500">Endereço</div>
+      <div class="text-zinc-100"><%= @local.endereco.presence || "-" %></div>
+    </div>
+  </div>
+
+  <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+    <div class="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
+      <h3 class="font-bold text-zinc-100">Itens neste estoque</h3>
+
+      <span class="text-xs text-zinc-500">
+        Lista paginada
+      </span>
+    </div>
+
+    <table class="w-full text-sm">
+      <thead class="bg-zinc-800/70 text-zinc-400">
+        <tr>
+          <th class="px-4 py-3 text-left">Produto</th>
+          <th class="px-4 py-3 text-left">Categoria</th>
+          <th class="px-4 py-3 text-right">Quantidade</th>
+          <th class="px-4 py-3 text-right">Ação</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-zinc-800">
+        <% @saldos.each do |saldo| %>
+          <tr class="hover:bg-zinc-800/40">
+            <td class="px-4 py-3">
+              <%= link_to saldo.produto.nome,
+                estoque_produto_path(saldo.produto),
+                class: "text-amber-400 hover:text-amber-300 font-medium" %>
+            </td>
+
+            <td class="px-4 py-3 text-zinc-400">
+              <%= saldo.produto.categoria.presence || "-" %>
+            </td>
+
+            <td class="px-4 py-3 text-right text-zinc-100 font-semibold">
+              <%= formatar_quantidade(saldo.quantidade) %>
+            </td>
+
+            <td class="px-4 py-3 text-right">
+              <%= link_to "Movimentar",
+                new_estoque_movimentacao_path(
+                  produto_id: saldo.produto.id,
+                  origem_local_id: @local.id
+                ),
+                class: "text-xs text-amber-400 hover:text-amber-300 font-semibold" %>
+            </td>
+          </tr>
+        <% end %>
+
+        <% if @saldos.empty? %>
+          <tr>
+            <td colspan="4" class="px-4 py-6 text-center text-zinc-500">
+              Nenhum item com saldo neste estoque.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <%= render "shared/pagination", pagination: @saldos_pagination %>
+  </div>
+</div>

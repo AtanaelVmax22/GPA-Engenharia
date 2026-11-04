@@ -1,6 +1,7 @@
 require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
+  config.hosts << "curdle-suggest-refold.ngrok-free.dev"
   # Settings specified here will take precedence over those in config/application.rb.
 
   config.hosts << "vmaxnet.ddns.net"

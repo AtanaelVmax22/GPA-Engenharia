@@ -1,80 +1,204 @@
-<%= form_with model: condominio, class: "space-y-6" do |f| %>
+
+<%= form_with model: condominio, class: "gpa-form" do |f| %>
+
+  <!-- Erros de validação -->
   <% if condominio.errors.any? %>
-    <div class="bg-red-900/50 border border-red-700 rounded-xl p-4 text-red-300 text-sm">
-      <% condominio.errors.full_messages.each do |msg| %>
-        <div>&bull; <%= msg %></div>
-      <% end %>
+    <div class="gpa-form-errors" role="alert">
+      <strong>
+        Não foi possível salvar o condomínio.
+      </strong>
+
+      <ul>
+        <% condominio.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
     </div>
   <% end %>
 
   <!-- Informações principais -->
-  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-    <h2 class="text-base font-semibold text-amber-400 mb-4">Informações do Condomínio</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="md:col-span-2">
-        <%= f.label :nome, "Nome do Condomínio", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :nome, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-amber-500", placeholder: "Ed. Solar das Flores" %>
-      </div>
-      <div class="md:col-span-2">
-        <%= f.label :endereco, "Endereço", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :endereco, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
+  <section class="gpa-panel">
+    <div class="gpa-panel-header">
       <div>
-        <%= f.label :bairro, "Bairro", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :bairro, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div>
-        <%= f.label :cidade, "Cidade", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :cidade, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div>
-        <%= f.label :estado, "Estado", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :estado, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500", placeholder: "SP" %>
-      </div>
-      <div>
-        <%= f.label :cep, "CEP", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :cep, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div>
-        <%= f.label :unidades, "Nº de Unidades", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.number_field :unidades, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div>
-        <%= f.label :status, "Status", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.select :status, Condominio.statuses.keys.map { |s| [s.humanize, s] },
-            {}, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
+        <h2 class="gpa-panel-title">
+          Informações do Condomínio
+        </h2>
+        <p class="gpa-panel-subtitle">
+          Dados cadastrais e localização.
+        </p>
       </div>
     </div>
-  </div>
+
+    <div class="gpa-form-grid">
+
+      <div class="gpa-field gpa-field-full">
+        <%= f.label :nome, "Nome do Condomínio",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :nome,
+          class: "gpa-input",
+          placeholder: "Ex.: Edifício Solar das Flores" %>
+      </div>
+
+      <div class="gpa-field gpa-field-full">
+        <%= f.label :endereco, "Endereço",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :endereco,
+          class: "gpa-input",
+          placeholder: "Rua, avenida e número" %>
+      </div>
+
+      <div class="gpa-field">
+        <%= f.label :bairro, "Bairro",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :bairro,
+          class: "gpa-input",
+          placeholder: "Bairro" %>
+      </div>
+
+      <div class="gpa-field">
+        <%= f.label :cidade, "Cidade",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :cidade,
+          class: "gpa-input",
+          placeholder: "Cidade" %>
+      </div>
+
+      <div class="gpa-field">
+        <%= f.label :estado, "Estado (UF)",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :estado,
+          class: "gpa-input",
+          placeholder: "Ex.: PE",
+          maxlength: 2,
+          style: "text-transform: uppercase" %>
+      </div>
+
+      <div class="gpa-field">
+        <%= f.label :cep, "CEP",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :cep,
+          class: "gpa-input",
+          placeholder: "00000-000",
+          inputmode: "numeric",
+          autocomplete: "postal-code" %>
+      </div>
+
+      <div class="gpa-field">
+        <%= f.label :unidades, "Número de Unidades",
+          class: "gpa-form-label" %>
+
+        <%= f.number_field :unidades,
+          class: "gpa-input",
+          min: 0,
+          placeholder: "Quantidade de unidades" %>
+      </div>
+
+      <div class="gpa-field">
+        <%= f.label :status, "Status",
+          class: "gpa-form-label" %>
+
+        <%= f.select :status,
+          Condominio.statuses.keys.map { |s| [s.humanize, s] },
+          {},
+          class: "gpa-input gpa-select" %>
+      </div>
+
+    </div>
+  </section>
 
   <!-- Síndico -->
-  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-    <h2 class="text-base font-semibold text-amber-400 mb-4">Dados do Síndico</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <section class="gpa-panel">
+
+    <div class="gpa-panel-header">
       <div>
-        <%= f.label :sindico_nome, "Nome", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :sindico_nome, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div>
-        <%= f.label :sindico_telefone, "Telefone", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.text_field :sindico_telefone, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
-      </div>
-      <div>
-        <%= f.label :sindico_email, "E-mail", class: "block text-sm font-medium text-zinc-300 mb-1" %>
-        <%= f.email_field :sindico_email, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500" %>
+        <h2 class="gpa-panel-title">
+          Dados do Síndico
+        </h2>
+        <p class="gpa-panel-subtitle">
+          Informações de contato do responsável.
+        </p>
       </div>
     </div>
-  </div>
+
+    <div class="gpa-form-grid gpa-form-grid-three">
+
+      <div class="gpa-field">
+        <%= f.label :sindico_nome, "Nome",
+          class: "gpa-form-label" %>
+
+        <%= f.text_field :sindico_nome,
+          class: "gpa-input",
+          placeholder: "Nome do síndico",
+          autocomplete: "name" %>
+      </div>
+
+      <div class="gpa-field">
+        <%= f.label :sindico_telefone, "Telefone",
+          class: "gpa-form-label" %>
+
+        <%= f.telephone_field :sindico_telefone,
+          class: "gpa-input",
+          placeholder: "(00) 00000-0000",
+          autocomplete: "tel" %>
+      </div>
+
+      <div class="gpa-field">
+        <%= f.label :sindico_email, "E-mail",
+          class: "gpa-form-label" %>
+
+        <%= f.email_field :sindico_email,
+          class: "gpa-input",
+          placeholder: "email@exemplo.com",
+          autocomplete: "email" %>
+      </div>
+
+    </div>
+  </section>
 
   <!-- Observações -->
-  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-    <h2 class="text-base font-semibold text-amber-400 mb-4">Observações</h2>
-    <%= f.text_area :observacoes, rows: 4, class: "w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-100 text-sm focus:outline-none focus:border-amber-500 resize-none", placeholder: "Informações adicionais, particularidades do local..." %>
+  <section class="gpa-panel">
+    <div class="gpa-panel-header">
+      <div>
+        <h2 class="gpa-panel-title">
+          Observações
+        </h2>
+        <p class="gpa-panel-subtitle">
+          Informações adicionais sobre o condomínio.
+        </p>
+      </div>
+    </div>
+
+    <div class="gpa-field">
+      <%= f.label :observacoes, "Observações técnicas",
+        class: "gpa-form-label" %>
+
+      <%= f.text_area :observacoes,
+        rows: 5,
+        class: "gpa-input gpa-textarea",
+        placeholder: "Informações adicionais, particularidades do local..." %>
+    </div>
+  </section>
+
+  <!-- Botões -->
+  <div class="gpa-form-footer">
+
+    <%= f.submit(
+      condominio.new_record? ?
+        "Cadastrar Condomínio" :
+        "Salvar Alterações",
+      class: "gpa-btn gpa-btn-primary"
+    ) %>
+
+    <%= link_to "Cancelar",
+      condominios_path,
+      class: "gpa-btn gpa-btn-secondary" %>
+
   </div>
 
-  <div class="flex gap-3">
-    <%= f.submit condominio.new_record? ? "Cadastrar Condomínio" : "Salvar Alterações",
-        class: "px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-900 font-semibold rounded-xl text-sm cursor-pointer transition-colors" %>
-    <%= link_to "Cancelar", condominios_path, class: "px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl text-sm transition-colors" %>
-  </div>
 <% end %>

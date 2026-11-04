@@ -29,7 +29,7 @@
         <% m = midias.first %>
         <% if m.video? %>
           <video controls class="w-full aspect-video object-cover bg-black">
-            <%= source_tag rails_blob_url(m), type: m.content_type %>
+            <source src="<%= rails_blob_url(m) %>" type="<%= m.content_type %>">
           </video>
         <% else %>
           <%= image_tag m, class: "w-full aspect-square object-cover" %>
