@@ -6,6 +6,10 @@ module Estoque
 
     has_many :saldos, class_name: "Estoque::Saldo", dependent: :destroy
     has_many :movimentacoes, class_name: "Estoque::Movimentacao", dependent: :restrict_with_error
+    has_many :itens,
+              class_name: "Estoque::Item",
+              foreign_key: :produto_id,
+              dependent: :restrict_with_error
 
     before_validation :generate_qr_token, on: :create
 

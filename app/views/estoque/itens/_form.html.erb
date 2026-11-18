@@ -1,146 +1,286 @@
-<%= form_with model: [:estoque, @item], class: "space-y-6" do |form| %>
-  <% if @item.errors.any? %>
-    <div class="bg-red-500/10 border border-red-500/30 text-red-300 rounded-xl p-4">
-      <h3 class="font-bold mb-2">Corrija os erros abaixo:</h3>
 
-      <ul class="list-disc list-inside text-sm space-y-1">
-        <% @item.errors.full_messages.each do |message| %>
+<%# ==========================================
+    GPA ENGENHARIA - FORMULÁRIO DE ITENS
+    Cadastro e edição de equipamentos individuais
+    ========================================== %>
+
+<% item = @item %>
+<% editando = item.persisted? %>
+
+<%= form_with(
+  model: item,
+  url: editando ? estoque_item_path(item) : estoque_itens_path,
+  method: editando ? :patch : :post,
+  class: "gpa-form"
+) do |form| %>
+
+  <%# ERROS DE VALIDAÇÃO %>
+  <% if item.errors.any? %>
+    <div class="gpa-form-errors" role="alert">
+      <strong>Não foi possível salvar o item.</strong>
+
+      <ul>
+        <% item.errors.full_messages.each do |message| %>
           <li><%= message %></li>
         <% end %>
       </ul>
     </div>
   <% end %>
 
-  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-5">
-    <h3 class="text-zinc-100 font-bold">Identificação do item</h3>
+  <%# ==========================================
+      IDENTIFICAÇÃO DO ITEM
+      ========================================== %>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <section class="gpa-panel">
+
+    <div class="gpa-panel-header">
       <div>
-        <%= form.label :produto_id, "Produto", class: "block text-sm text-zinc-300 mb-1" %>
+        <h2 class="gpa-panel-title">
+          Identificação do Item
+        </h2>
+
+        <p class="gpa-panel-subtitle">
+          Informações individuais para identificação
+          e rastreamento do equipamento.
+        </p>
+      </div>
+    </div>
+
+    <div class="gpa-form-grid">
+
+      <%# PRODUTO %>
+      <div class="gpa-field">
+        <%= form.label :produto_id, "Produto",
+          class: "gpa-form-label" %>
+
         <%= form.collection_select :produto_id,
           @produtos,
           :id,
           :nome,
           { prompt: "Selecione o produto" },
-          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+          class: "gpa-input gpa-select",
+          required: true %>
       </div>
 
-      <div>
-        <%= form.label :local_id, "Depósito/local atual", class: "block text-sm text-zinc-300 mb-1" %>
+      <%# LOCAL %>
+      <div class="gpa-field">
+        <%= form.label :local_id, "Depósito / Local Atual",
+          class: "gpa-form-label" %>
+
         <%= form.collection_select :local_id,
           @locais,
           :id,
           :nome,
           { include_blank: "Sem local definido" },
-          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+          class: "gpa-input gpa-select" %>
       </div>
 
-      <div>
-        <%= form.label :codigo_patrimonio, "Código de patrimônio", class: "block text-sm text-zinc-300 mb-1" %>
+      <%# CÓDIGO DE PATRIMÔNIO %>
+      <div class="gpa-field">
+        <%= form.label :codigo_patrimonio, "Código de Patrimônio GPA",
+          class: "gpa-form-label" %>
+
         <%= form.text_field :codigo_patrimonio,
-          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
-          placeholder: "Ex: ONU-0001" %>
+          class: "gpa-input",
+          placeholder: "Ex.: GPA-CAM-000001",
+          autocomplete: "off" %>
+
+        <p class="gpa-field-hint">
+          Identificação interna exclusiva do equipamento.
+        </p>
       </div>
 
-      <div>
-        <%= form.label :numero_serie, "Número de série", class: "block text-sm text-zinc-300 mb-1" %>
+      <%# NÚMERO DE SÉRIE %>
+      <div class="gpa-field">
+        <%= form.label :numero_serie, "Número de Série do Fabricante",
+          class: "gpa-form-label" %>
+
         <%= form.text_field :numero_serie,
-          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
-          placeholder: "Serial do equipamento" %>
+          class: "gpa-input",
+          placeholder: "Serial original do equipamento",
+          autocomplete: "off" %>
       </div>
 
-      <div>
-        <%= form.label :mac, "MAC", class: "block text-sm text-zinc-300 mb-1" %>
+      <%# MAC %>
+      <div class="gpa-field">
+        <%= form.label :mac, "Endereço MAC",
+          class: "gpa-form-label" %>
+
         <%= form.text_field :mac,
-          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
-          placeholder: "Ex: AA:BB:CC:DD:EE:FF" %>
+          class: "gpa-input",
+          placeholder: "AA:BB:CC:DD:EE:FF",
+          autocomplete: "off" %>
       </div>
 
-      <div>
-        <%= form.label :status, "Status", class: "block text-sm text-zinc-300 mb-1" %>
+      <%# STATUS %>
+      <div class="gpa-field">
+        <%= form.label :status, "Status do Item",
+          class: "gpa-form-label" %>
+
         <%= form.select :status,
-          Estoque::Item.statuses.keys.map { |status| [status_item_label(status), status] },
+          Estoque::Item.statuses.keys.map { |status|
+            [status_item_label(status), status]
+          },
           {},
-          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+          class: "gpa-input gpa-select" %>
+      </div>
+
+    </div>
+  </section>
+
+  <%# ==========================================
+      COMPRA E GARANTIA
+      ========================================== %>
+
+  <section class="gpa-panel">
+
+    <div class="gpa-panel-header">
+      <div>
+        <h2 class="gpa-panel-title">
+          Compra e Garantia
+        </h2>
+
+        <p class="gpa-panel-subtitle">
+          Dados do fornecedor e prazos de cobertura
+          do equipamento.
+        </p>
       </div>
     </div>
-  </div>
 
-  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-5">
-    <h3 class="text-zinc-100 font-bold">Compra e garantia</h3>
+    <div class="gpa-form-grid">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <%= form.label :fornecedor_nome, "Fornecedor/loja", class: "block text-sm text-zinc-300 mb-1" %>
+      <%# FORNECEDOR %>
+      <div class="gpa-field">
+        <%= form.label :fornecedor_nome, "Fornecedor / Loja",
+          class: "gpa-form-label" %>
+
         <%= form.text_field :fornecedor_nome,
-          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
-          placeholder: "Nome da loja ou fornecedor" %>
+          class: "gpa-input",
+          placeholder: "Nome do fornecedor" %>
       </div>
 
-      <div>
-        <%= form.label :nota_fiscal_numero, "Número da nota fiscal", class: "block text-sm text-zinc-300 mb-1" %>
+      <%# NOTA FISCAL %>
+      <div class="gpa-field">
+        <%= form.label :nota_fiscal_numero, "Número da Nota Fiscal",
+          class: "gpa-form-label" %>
+
         <%= form.text_field :nota_fiscal_numero,
-          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
-          placeholder: "Ex: NF 12345" %>
+          class: "gpa-input",
+          placeholder: "Ex.: NF 12345" %>
       </div>
 
-      <div>
-        <%= form.label :data_compra, "Data da compra", class: "block text-sm text-zinc-300 mb-1" %>
+      <%# DATA DA COMPRA %>
+      <div class="gpa-field">
+        <%= form.label :data_compra, "Data da Compra",
+          class: "gpa-form-label" %>
+
         <%= form.date_field :data_compra,
-          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+          class: "gpa-input" %>
       </div>
 
-      <div>
-        <%= form.label :data_instalacao, "Data da instalação", class: "block text-sm text-zinc-300 mb-1" %>
+      <%# DATA DA INSTALAÇÃO %>
+      <div class="gpa-field">
+        <%= form.label :data_instalacao, "Data da Instalação",
+          class: "gpa-form-label" %>
+
         <%= form.date_field :data_instalacao,
-          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+          class: "gpa-input" %>
       </div>
 
-      <div>
-        <%= form.label :garantia_loja_dias, "Garantia da loja em dias", class: "block text-sm text-zinc-300 mb-1" %>
+      <%# GARANTIA DA LOJA %>
+      <div class="gpa-field">
+        <%= form.label :garantia_loja_dias, "Garantia da Loja (dias)",
+          class: "gpa-form-label" %>
+
         <%= form.number_field :garantia_loja_dias,
           min: 0,
-          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+          step: 1,
+          class: "gpa-input",
+          placeholder: "Ex.: 90" %>
       </div>
 
-      <div>
-        <%= form.label :garantia_fabrica_meses, "Garantia da fábrica em meses", class: "block text-sm text-zinc-300 mb-1" %>
+      <%# GARANTIA DO FABRICANTE %>
+      <div class="gpa-field">
+        <%= form.label :garantia_fabrica_meses, "Garantia do Fabricante (meses)",
+          class: "gpa-form-label" %>
+
         <%= form.number_field :garantia_fabrica_meses,
           min: 0,
-          class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+          step: 1,
+          class: "gpa-input",
+          placeholder: "Ex.: 12" %>
+      </div>
+
+    </div>
+  </section>
+
+  <%# ==========================================
+      INSTALAÇÃO E OBSERVAÇÕES
+      ========================================== %>
+
+  <section class="gpa-panel">
+
+    <div class="gpa-panel-header">
+      <div>
+        <h2 class="gpa-panel-title">
+          Instalação e Localização
+        </h2>
+
+        <p class="gpa-panel-subtitle">
+          Vínculo com o condomínio e informações
+          adicionais do equipamento.
+        </p>
       </div>
     </div>
-  </div>
 
-  <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-5">
-    <h3 class="text-zinc-100 font-bold">Instalação</h3>
+    <div class="gpa-form-grid">
 
-    <div>
-      <%= form.label :condominio_id, "ID do condomínio", class: "block text-sm text-zinc-300 mb-1" %>
-      <%= form.number_field :condominio_id,
-        class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
-        placeholder: "Por enquanto informe o ID do condomínio, depois vamos trocar por lista" %>
+      <%# CONDOMÍNIO %>
+      <div class="gpa-field gpa-field-full">
+        <%= form.label :condominio_id, "Condomínio",
+          class: "gpa-form-label" %>
 
-      <p class="text-xs text-zinc-500 mt-1">
-        Nesta etapa vamos salvar apenas o ID. Depois vamos vincular direto com o cadastro de condomínios.
-      </p>
+        <%= form.number_field :condominio_id,
+          min: 1,
+          class: "gpa-input",
+          placeholder: "Informe o ID do condomínio" %>
+
+        <p class="gpa-field-hint">
+          Por enquanto, informe o ID do condomínio.
+          A seleção por lista será implementada
+          na próxima etapa.
+        </p>
+      </div>
+
+      <%# OBSERVAÇÕES %>
+      <div class="gpa-field gpa-field-full">
+        <%= form.label :observacao, "Observações",
+          class: "gpa-form-label" %>
+
+        <%= form.text_area :observacao,
+          rows: 5,
+          class: "gpa-input gpa-textarea",
+          placeholder: "Detalhes do item, instalação, defeito ou garantia..." %>
+      </div>
+
     </div>
+  </section>
 
-    <div>
-      <%= form.label :observacao, "Observação", class: "block text-sm text-zinc-300 mb-1" %>
-      <%= form.text_area :observacao,
-        rows: 4,
-        class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
-        placeholder: "Detalhes do item, instalação, defeito ou garantia" %>
-    </div>
-  </div>
+  <%# ==========================================
+      AÇÕES
+      ========================================== %>
 
-  <div class="flex items-center justify-end gap-3">
+  <div class="gpa-form-footer">
+
     <%= link_to "Cancelar",
       estoque_itens_path,
-      class: "px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm text-zinc-100" %>
+      class: "gpa-btn gpa-btn-secondary" %>
 
-    <%= form.submit "Salvar item",
-      class: "px-5 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-lg cursor-pointer" %>
+    <%= form.submit(
+      editando ? "Salvar Alterações" : "Cadastrar Item",
+      class: "gpa-btn gpa-btn-primary"
+    ) %>
+
   </div>
+
 <% end %>

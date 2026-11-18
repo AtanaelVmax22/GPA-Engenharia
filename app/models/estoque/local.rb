@@ -1,3 +1,4 @@
+
 module Estoque
   class Local < ApplicationRecord
     self.table_name = "estoque_locais"
@@ -12,7 +13,14 @@ module Estoque
       descarte: 6
     }
 
-    belongs_to :responsavel, class_name: "User", optional: true
+    belongs_to :responsavel,
+      class_name: "User",
+      optional: true
+
+    belongs_to :condominio,
+      class_name: "Condominio",
+      optional: true,
+      inverse_of: :local_estoque
 
     has_many :saldos,
       class_name: "Estoque::Saldo",
@@ -38,14 +46,26 @@ module Estoque
       through: :local_responsaveis,
       source: :user
 
+    has_many :itens,
+      class_name: "Estoque::Item",
+      foreign_key: :local_id,
+      dependent: :nullify
+
     before_validation :generate_qr_token, on: :create
-    after_save :sincronizar_responsaveis_multiplos, if: :responsavel_ids_para_salvar_definido?
+
+    after_save :sincronizar_responsaveis_multiplos,
+      if: :responsavel_ids_para_salvar_definido?
 
     validates :nome, presence: true
     validates :tipo, presence: true
     validates :qr_token, presence: true, uniqueness: true
 
+    validates :condominio_id,
+      uniqueness: true,
+      allow_nil: true
+
     validate :limite_de_responsaveis
+    validate :validar_vinculo_condominio
 
     scope :ativos, -> { where(ativo: true) }
 
@@ -76,6 +96,22 @@ module Estoque
       self.qr_token ||= SecureRandom.hex(16)
     end
 
+    def validar_vinculo_condominio
+      if condominio? && condominio_id.blank?
+        errors.add(
+          :condominio,
+          "deve ser informado para um estoque de condomínio"
+        )
+      end
+
+      if condominio_id.present? && !condominio?
+        errors.add(
+          :tipo,
+          "deve ser condomínio quando houver vínculo com um condomínio"
+        )
+      end
+    end
+
     def responsavel_ids_para_salvar_definido?
       defined?(@responsavel_ids_para_salvar)
     end
@@ -89,23 +125,33 @@ module Estoque
         end
 
       if ids.size > 3
-        errors.add(:responsaveis, "permite no máximo 3 responsáveis")
+        errors.add(
+          :responsaveis,
+          "permite no máximo 3 responsáveis"
+        )
       end
     end
 
     def sincronizar_responsaveis_multiplos
       ids = @responsavel_ids_para_salvar
 
-      local_responsaveis.where.not(user_id: ids).destroy_all
+      local_responsaveis
+        .where.not(user_id: ids)
+        .destroy_all
 
       ids.each do |user_id|
-        local_responsaveis.find_or_create_by!(user_id: user_id)
+        local_responsaveis.find_or_create_by!(
+          user_id: user_id
+        )
       end
 
       responsavel_principal_id = ids.first
 
       if responsavel_id != responsavel_principal_id
-        update_column(:responsavel_id, responsavel_principal_id)
+        update_column(
+          :responsavel_id,
+          responsavel_principal_id
+        )
       end
     end
   end

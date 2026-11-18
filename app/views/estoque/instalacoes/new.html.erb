@@ -1,0 +1,98 @@
+
+<% content_for :page_title do %>
+  Instalar Equipamento
+<% end %>
+
+<div class="max-w-3xl mx-auto space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold text-zinc-100">
+      Instalar Equipamento
+    </h1>
+
+    <p class="mt-2 text-sm text-zinc-400">
+      Condomínio: <%= @condominio.nome %>
+    </p>
+  </div>
+
+  <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-5 md:p-6">
+
+    <%= form_with scope: :instalacao,
+      url: estoque_instalacoes_path(
+        condominio_id: @condominio.id
+      ),
+      class: "space-y-5" do |f| %>
+
+      <div>
+        <%= f.label :item_id, "Equipamento disponível",
+          class: "block mb-2 text-sm text-zinc-300" %>
+
+        <%= f.select :item_id,
+          @itens.map { |item|
+            [
+              "#{item.produto.nome} — #{item.identificacao}",
+              item.id
+            ]
+          },
+          {
+            prompt: "Selecione o equipamento",
+            selected: params.dig(:instalacao, :item_id)
+          },
+          class: "w-full rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-zinc-100",
+          required: true %>
+      </div>
+
+      <div>
+        <%= f.label :local_instalacao,
+          "Local exato da instalação",
+          class: "block mb-2 text-sm text-zinc-300" %>
+
+        <%= f.text_field :local_instalacao,
+          value: params.dig(:instalacao, :local_instalacao),
+          placeholder: "Ex.: Portaria, garagem, elevador...",
+          required: true,
+          class: "w-full rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-zinc-100" %>
+      </div>
+
+      <div>
+        <%= f.label :data_instalacao,
+          "Data da instalação",
+          class: "block mb-2 text-sm text-zinc-300" %>
+
+        <%= f.date_field :data_instalacao,
+          value: params.dig(:instalacao, :data_instalacao).presence || Date.current,
+          max: Date.current,
+          required: true,
+          class: "w-full rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-zinc-100" %>
+      </div>
+
+      <div>
+        <%= f.label :observacao,
+          "Observações",
+          class: "block mb-2 text-sm text-zinc-300" %>
+
+        <%= f.text_area :observacao,
+          value: params.dig(:instalacao, :observacao),
+          rows: 3,
+          placeholder: "Detalhes adicionais...",
+          class: "w-full rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-zinc-100" %>
+      </div>
+
+      <% if @itens.empty? %>
+        <div class="rounded-lg border border-amber-500/30 p-3 text-sm text-amber-400">
+          Nenhum equipamento individual disponível
+          para instalação neste condomínio.
+        </div>
+      <% end %>
+
+      <div class="flex flex-wrap justify-between gap-3">
+        <%= link_to "Voltar",
+          condominio_path(@condominio),
+          class: "rounded-lg bg-zinc-800 px-4 py-3 text-sm text-zinc-200" %>
+
+        <%= f.submit "Confirmar instalação",
+          disabled: @itens.empty?,
+          class: "rounded-lg bg-amber-500 px-5 py-3 text-sm font-semibold text-zinc-950 cursor-pointer disabled:opacity-40" %>
+      </div>
+    <% end %>
+  </div>
+</div>

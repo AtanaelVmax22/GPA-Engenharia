@@ -90,6 +90,11 @@ Rails.application.routes.draw do
 
     root "home#index"
 
+    #Entradas avulso condominios
+     resources :entradas_avulsas,
+     only: [:new, :create]
+     resources :instalacoes, only: [:new, :create]
+
     # Garantias
     get "garantias",
       to: "garantias#index",

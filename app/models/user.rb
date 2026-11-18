@@ -8,6 +8,11 @@ class User < ApplicationRecord
   has_many :post_tecnicos, dependent: :destroy
   has_many :comentarios, dependent: :destroy
   has_many :checklists, dependent: :destroy
+  has_many :condominio_tecnicos, dependent: :destroy
+
+  has_many :condominios_autorizados,
+  through: :condominio_tecnicos,
+  source: :condominio
 
   validates :nome, presence: true
   validates :role, presence: true

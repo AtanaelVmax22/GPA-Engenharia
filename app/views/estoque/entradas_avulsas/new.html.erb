@@ -1,0 +1,206 @@
+
+<% content_for :page_title do %>
+  Entrada Avulsa
+<% end %>
+
+<div class="max-w-3xl mx-auto space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold text-zinc-100">
+      Entrada avulsa de equipamento
+    </h1>
+
+    <p class="mt-2 text-sm text-zinc-400">
+      Registre equipamentos recebidos diretamente
+      no condomínio, sem passagem pelo almoxarifado.
+    </p>
+  </div>
+
+  <div class="rounded-xl border border-zinc-800 bg-zinc-900 p-5 md:p-6">
+    <%= form_with scope: :entrada_avulsa,
+      url: estoque_entradas_avulsas_path,
+      class: "space-y-5",
+      data: { controller: "leitor-patrimonio" } do |f| %>
+
+      <div>
+        <%= f.label :local_id, "Condomínio de destino",
+          class: "block mb-2 text-sm text-zinc-300" %>
+
+        <%= f.collection_select :local_id,
+          @locais,
+          :id,
+          :nome,
+          {
+            prompt: "Selecione o condomínio",
+            selected: @dados["local_id"]
+          },
+          class: "w-full rounded-lg bg-zinc-950 border border-zinc-700 p-3 text-zinc-100",
+          required: true %>
+      </div>
+
+      <div>
+        <%= f.label :produto_id, "Produto",
+          class: "block mb-2 text-sm text-zinc-300" %>
+
+        <%= f.collection_select :produto_id,
+          @produtos,
+          :id,
+          :nome,
+          {
+            prompt: "Selecione o produto",
+            selected: @dados["produto_id"]
+          },
+          class: "w-full rounded-lg bg-zinc-950 border border-zinc-700 p-3 text-zinc-100",
+          required: true %>
+      </div>
+
+      <div class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-3">
+        <h2 class="font-semibold text-amber-400">
+          Leitura rápida da embalagem
+        </h2>
+
+        <p class="text-xs text-zinc-400">
+          Escaneie a etiqueta do número de série.
+          Não utilize o EAN/GTIN do produto como
+          identificação individual.
+        </p>
+
+        <div class="flex flex-wrap gap-2">
+          <button type="button"
+            data-action="click->leitor-patrimonio#iniciar"
+            class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-zinc-950">
+            Abrir câmera
+          </button>
+
+          <button type="button"
+            data-action="click->leitor-patrimonio#parar"
+            class="rounded-lg bg-zinc-800 px-4 py-2 text-sm text-zinc-200">
+            Fechar câmera
+          </button>
+        </div>
+
+        <video
+          data-leitor-patrimonio-target="video"
+          class="hidden w-full rounded-lg bg-black max-h-64"
+          autoplay
+          muted
+          playsinline>
+        </video>
+
+        <p
+          data-leitor-patrimonio-target="mensagem"
+          role="status"
+          aria-live="polite"
+          class="text-xs text-zinc-400">
+          Também é possível usar leitor USB/Bluetooth
+          ou digitar a identificação.
+        </p>
+
+        <div>
+          <%= f.label :numero_serie, "Número de série",
+            class: "block mb-2 text-sm text-zinc-300" %>
+
+          <%= f.text_field :numero_serie,
+            value: @dados["numero_serie"],
+            data: { leitor_patrimonio_target: "serie" },
+            autocomplete: "off",
+            placeholder: "Escaneie ou digite o número de série",
+            class: "w-full rounded-lg bg-zinc-950 border border-zinc-700 p-3 text-zinc-100" %>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= f.label :codigo_patrimonio, "Patrimônio GPA",
+            class: "block mb-2 text-sm text-zinc-300" %>
+
+          <%= f.text_field :codigo_patrimonio,
+            value: @dados["codigo_patrimonio"],
+            placeholder: "Código patrimonial",
+            class: "w-full rounded-lg bg-zinc-950 border border-zinc-700 p-3 text-zinc-100" %>
+        </div>
+
+        <div>
+          <%= f.label :mac, "MAC (se houver)",
+            class: "block mb-2 text-sm text-zinc-300" %>
+
+          <%= f.text_field :mac,
+            value: @dados["mac"],
+            placeholder: "AA:BB:CC:DD:EE:FF",
+            class: "w-full rounded-lg bg-zinc-950 border border-zinc-700 p-3 text-zinc-100" %>
+        </div>
+
+        <div>
+          <%= f.label :data_compra, "Data da compra",
+            class: "block mb-2 text-sm text-zinc-300" %>
+
+          <%= f.date_field :data_compra,
+            value: @dados["data_compra"],
+            class: "w-full rounded-lg bg-zinc-950 border border-zinc-700 p-3 text-zinc-100" %>
+        </div>
+
+        <div>
+          <%= f.label :fornecedor_nome, "Fornecedor",
+            class: "block mb-2 text-sm text-zinc-300" %>
+
+          <%= f.text_field :fornecedor_nome,
+            value: @dados["fornecedor_nome"],
+            class: "w-full rounded-lg bg-zinc-950 border border-zinc-700 p-3 text-zinc-100" %>
+        </div>
+
+        <div>
+          <%= f.label :nota_fiscal_numero, "Nota fiscal",
+            class: "block mb-2 text-sm text-zinc-300" %>
+
+          <%= f.text_field :nota_fiscal_numero,
+            value: @dados["nota_fiscal_numero"],
+            class: "w-full rounded-lg bg-zinc-950 border border-zinc-700 p-3 text-zinc-100" %>
+        </div>
+
+        <div>
+          <%= f.label :garantia_loja_dias, "Garantia da loja (dias)",
+            class: "block mb-2 text-sm text-zinc-300" %>
+
+          <%= f.number_field :garantia_loja_dias,
+            value: @dados["garantia_loja_dias"] || 90,
+            min: 0,
+            class: "w-full rounded-lg bg-zinc-950 border border-zinc-700 p-3 text-zinc-100" %>
+        </div>
+
+        <div>
+          <%= f.label :garantia_fabrica_meses,
+            "Garantia do fabricante (meses)",
+            class: "block mb-2 text-sm text-zinc-300" %>
+
+          <%= f.number_field :garantia_fabrica_meses,
+            value: @dados["garantia_fabrica_meses"] || 12,
+            min: 0,
+            class: "w-full rounded-lg bg-zinc-950 border border-zinc-700 p-3 text-zinc-100" %>
+        </div>
+      </div>
+
+      <div>
+        <%= f.label :observacao, "Observações",
+          class: "block mb-2 text-sm text-zinc-300" %>
+
+        <%= f.text_area :observacao,
+          value: @dados["observacao"],
+          rows: 3,
+          class: "w-full rounded-lg bg-zinc-950 border border-zinc-700 p-3 text-zinc-100" %>
+      </div>
+
+      <div class="rounded-lg border border-zinc-700 bg-zinc-950 p-3 text-sm text-zinc-400">
+        Será registrada 1 unidade no estoque do
+        condomínio, com status "Em estoque".
+        A instalação será registrada separadamente.
+      </div>
+
+      <div class="flex flex-wrap justify-between gap-3">
+        <%= link_to "Voltar", estoque_movimentacoes_path,
+          class: "rounded-lg bg-zinc-800 px-4 py-3 text-sm text-zinc-200" %>
+
+        <%= f.submit "Confirmar entrada avulsa",
+          class: "rounded-lg bg-amber-500 px-5 py-3 text-sm font-semibold text-zinc-950 cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+</div>

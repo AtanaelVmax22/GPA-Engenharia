@@ -3,4 +3,5 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.irregular "local", "locais"
   inflect.irregular "produto", "produtos"
   inflect.irregular "saldo", "saldos"
+  inflect.irregular "item", "itens"
 end

@@ -1,21 +1,34 @@
+
 <% content_for :page_title do %>
   Nova Movimentação
 <% end %>
 
 <div class="max-w-3xl mx-auto space-y-6">
   <div>
-    <h2 class="text-2xl font-bold text-zinc-100">Nova movimentação</h2>
+    <h2 class="text-2xl font-bold text-zinc-100">
+      Nova movimentação
+    </h2>
+
     <p class="text-sm text-zinc-500">
-      Registre entrada, saída, transferência, devolução, uso em serviço ou ajuste de inventário.
+      Registre entrada, saída, transferência, devolução,
+      uso em serviço ou ajuste de inventário.
     </p>
   </div>
 
   <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-    <%= form_with scope: :estoque_movimentacao, url: estoque_movimentacoes_path, class: "space-y-5", data: { controller: "movimentacao-estoque" } do |form| %>
+    <%= form_with scope: :estoque_movimentacao,
+      url: estoque_movimentacoes_path,
+      class: "space-y-5",
+      data: {
+        controller: "movimentacao-estoque destino-diferente",
+        action: "submit->destino-diferente#validarEnvio"
+      } do |form| %>
 
       <% if @produto_selecionado.present? %>
         <div>
-          <label class="block text-sm text-zinc-300 mb-1">Produto</label>
+          <label class="block text-sm text-zinc-300 mb-1">
+            Produto
+          </label>
 
           <div class="w-full px-4 py-3 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100">
             <div class="font-semibold">
@@ -24,24 +37,33 @@
 
             <% if @produto_selecionado.codigo.present? || @produto_selecionado.categoria.present? %>
               <div class="text-xs text-zinc-500 mt-1">
-                <%= [@produto_selecionado.codigo, @produto_selecionado.categoria].compact_blank.join(" · ") %>
+                <%= [
+                  @produto_selecionado.codigo,
+                  @produto_selecionado.categoria
+                ].compact_blank.join(" · ") %>
               </div>
             <% end %>
           </div>
 
           <%= form.hidden_field :produto_id,
             value: @produto_selecionado.id,
-            data: { movimentacao_estoque_target: "produto" } %>
+            data: {
+              movimentacao_estoque_target: "produto"
+            } %>
         </div>
       <% else %>
         <div>
-          <%= form.label :produto_id, "Produto", class: "block text-sm text-zinc-300 mb-1" %>
+          <%= form.label :produto_id, "Produto",
+            class: "block text-sm text-zinc-300 mb-1" %>
 
           <%= form.collection_select :produto_id,
             @produtos,
             :id,
             :nome,
-            { prompt: "Selecione o produto" },
+            {
+              prompt: "Selecione o produto",
+              selected: params.dig(:estoque_movimentacao, :produto_id)
+            },
             class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
             data: {
               movimentacao_estoque_target: "produto",
@@ -51,24 +73,31 @@
       <% end %>
 
       <div>
-        <%= form.label :tipo, "Tipo de movimentação", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.label :tipo, "Tipo de movimentação",
+          class: "block text-sm text-zinc-300 mb-1" %>
 
         <%= form.select :tipo,
           Estoque::Movimentacao.tipos.keys.map { |tipo| [tipo.humanize, tipo] },
-          { prompt: "Selecione o tipo" },
+          {
+            prompt: "Selecione o tipo",
+            selected: params.dig(:estoque_movimentacao, :tipo)
+          },
           class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
           data: {
             movimentacao_estoque_target: "tipo",
-            action: "change->movimentacao-estoque#verificar"
+            destino_diferente_target: "tipo",
+            action: "change->movimentacao-estoque#verificar change->destino-diferente#atualizar"
           } %>
       </div>
 
       <div>
-        <%= form.label :quantidade, "Quantidade", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.label :quantidade, "Quantidade",
+          class: "block text-sm text-zinc-300 mb-1" %>
 
         <%= form.number_field :quantidade,
           step: "0.001",
           min: "0.001",
+          value: params.dig(:estoque_movimentacao, :quantidade),
           class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
           data: {
             movimentacao_estoque_target: "quantidade",
@@ -83,49 +112,81 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <%= form.label :origem_local_id, "Estoque de origem", class: "block text-sm text-zinc-300 mb-1" %>
+          <%= form.label :origem_local_id, "Estoque de origem",
+            class: "block text-sm text-zinc-300 mb-1" %>
 
           <%= form.collection_select :origem_local_id,
             @locais,
             :id,
             :nome,
-            { include_blank: "Sem origem", selected: @origem_local_selecionado&.id },
+            {
+              include_blank: "Sem origem",
+              selected: @origem_local_selecionado&.id
+            },
             class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
             data: {
               movimentacao_estoque_target: "origem",
-              action: "change->movimentacao-estoque#verificar"
+              destino_diferente_target: "origem",
+              action: "change->movimentacao-estoque#verificar change->destino-diferente#atualizar"
             } %>
         </div>
 
         <div>
-          <%= form.label :destino_local_id, "Estoque de destino", class: "block text-sm text-zinc-300 mb-1" %>
+          <%= form.label :destino_local_id, "Estoque de destino",
+            class: "block text-sm text-zinc-300 mb-1" %>
 
           <%= form.collection_select :destino_local_id,
             @locais,
             :id,
             :nome,
-            { include_blank: "Sem destino", selected: @destino_local_selecionado&.id },
-            class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
+            {
+              include_blank: "Sem destino",
+              selected: @destino_local_selecionado&.id
+            },
+            class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100",
+            data: {
+              destino_diferente_target: "destino",
+              action: "change->destino-diferente#atualizar"
+            } %>
+
+          <p
+            class="mt-2 text-xs text-amber-400 hidden"
+            data-destino-diferente-target="dica"
+          >
+            Para transferências e devoluções, escolha um estoque
+            diferente do estoque de origem.
+          </p>
         </div>
       </div>
 
-      <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-4 text-sm text-zinc-400">
-        <p class="font-semibold text-zinc-300 mb-2">Regras rápidas:</p>
-        <p>Entrada: informe destino.</p>
-        <p>Saída, perda, defeito e uso em serviço: informe origem.</p>
-        <p>Transferência e devolução: informe origem e destino.</p>
-        <p>Ajuste e inventário: informe destino e a quantidade final contada.</p>
+      <div
+        class="hidden rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300"
+        role="alert"
+        data-destino-diferente-target="erro"
+      ></div>
+
+      <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-4 text-sm text-zinc-400 space-y-1">
+        <p class="font-semibold text-zinc-300 mb-2">
+          Regras rápidas:
+        </p>
+
+        <p>Entrada: informe o estoque de destino.</p>
+        <p>Saída, perda, defeito e uso em serviço: informe a origem.</p>
+        <p>Transferência e devolução: origem e destino diferentes.</p>
+        <p>Ajuste e inventário: informe o destino e a quantidade final contada.</p>
       </div>
 
       <div>
-        <%= form.label :observacao, "Observação", class: "block text-sm text-zinc-300 mb-1" %>
+        <%= form.label :observacao, "Observação",
+          class: "block text-sm text-zinc-300 mb-1" %>
 
         <%= form.text_area :observacao,
           rows: 4,
+          value: params.dig(:estoque_movimentacao, :observacao),
           class: "w-full px-4 py-2 rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-100" %>
       </div>
 
-      <div class="flex items-center justify-between pt-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-4">
         <%= link_to "Voltar",
           request.referer.presence || estoque_movimentacoes_path,
           class: "px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm" %>

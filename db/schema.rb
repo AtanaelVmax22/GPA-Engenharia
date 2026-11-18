@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_01_031440) do
+ActiveRecord::Schema[8.0].define(version: 2026_11_12_024150) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -74,6 +74,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_031440) do
     t.index ["user_id"], name: "index_comentarios_on_user_id"
   end
 
+  create_table "condominio_tecnicos", force: :cascade do |t|
+    t.bigint "condominio_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["condominio_id", "user_id"], name: "idx_condominio_tecnicos_unicos", unique: true
+    t.index ["condominio_id"], name: "index_condominio_tecnicos_on_condominio_id"
+    t.index ["user_id"], name: "index_condominio_tecnicos_on_user_id"
+  end
+
   create_table "condominios", force: :cascade do |t|
     t.string "nome"
     t.string "endereco"
@@ -133,11 +143,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_031440) do
     t.text "observacao"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["codigo_patrimonio"], name: "index_estoque_itens_on_codigo_patrimonio"
+    t.string "local_instalacao"
+    t.bigint "instalado_por_id"
+    t.index "upper(btrim((codigo_patrimonio)::text))", name: "idx_estoque_itens_patrimonio_normalizado", unique: true, where: "((codigo_patrimonio IS NOT NULL) AND (btrim((codigo_patrimonio)::text) <> ''::text))"
+    t.index "upper(btrim((numero_serie)::text))", name: "idx_estoque_itens_serie_normalizada", unique: true, where: "((numero_serie IS NOT NULL) AND (btrim((numero_serie)::text) <> ''::text))"
+    t.index "upper(regexp_replace((mac)::text, '[^0-9A-Fa-f]'::text, ''::text, 'g'::text))", name: "idx_estoque_itens_mac_normalizado", unique: true, where: "((mac IS NOT NULL) AND (btrim((mac)::text) <> ''::text))"
     t.index ["condominio_id"], name: "index_estoque_itens_on_condominio_id"
+    t.index ["instalado_por_id"], name: "index_estoque_itens_on_instalado_por_id"
     t.index ["local_id"], name: "index_estoque_itens_on_local_id"
-    t.index ["mac"], name: "index_estoque_itens_on_mac"
-    t.index ["numero_serie"], name: "index_estoque_itens_on_numero_serie"
     t.index ["produto_id"], name: "index_estoque_itens_on_produto_id"
     t.index ["status"], name: "index_estoque_itens_on_status"
   end
@@ -154,6 +167,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_031440) do
     t.string "qr_token", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "condominio_id"
+    t.index ["condominio_id"], name: "idx_estoque_locais_condominio_unico", unique: true
     t.index ["qr_token"], name: "index_estoque_locais_on_qr_token", unique: true
     t.index ["responsavel_id"], name: "index_estoque_locais_on_responsavel_id"
   end
@@ -166,6 +181,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_031440) do
     t.index ["local_id", "user_id"], name: "index_estoque_local_responsaveis_unique", unique: true
     t.index ["local_id"], name: "index_estoque_local_responsaveis_on_local_id"
     t.index ["user_id"], name: "index_estoque_local_responsaveis_on_user_id"
+  end
+
+  create_table "estoque_movimentacao_itens", force: :cascade do |t|
+    t.bigint "movimentacao_id", null: false
+    t.bigint "item_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["item_id"], name: "idx_estoque_mov_itens_item"
+    t.index ["movimentacao_id", "item_id"], name: "idx_estoque_mov_itens_unicos", unique: true
+    t.index ["movimentacao_id"], name: "idx_estoque_mov_itens_movimentacao"
   end
 
   create_table "estoque_movimentacoes", force: :cascade do |t|
@@ -281,14 +306,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_031440) do
   add_foreign_key "checklists", "users"
   add_foreign_key "comentarios", "post_tecnicos"
   add_foreign_key "comentarios", "users"
+  add_foreign_key "condominio_tecnicos", "condominios"
+  add_foreign_key "condominio_tecnicos", "users"
   add_foreign_key "curtidas", "post_tecnicos"
   add_foreign_key "curtidas", "users"
   add_foreign_key "equipamentos", "condominios"
   add_foreign_key "estoque_itens", "estoque_locais", column: "local_id"
   add_foreign_key "estoque_itens", "estoque_produtos", column: "produto_id"
+  add_foreign_key "estoque_itens", "users", column: "instalado_por_id"
+  add_foreign_key "estoque_locais", "condominios"
   add_foreign_key "estoque_locais", "users", column: "responsavel_id"
   add_foreign_key "estoque_local_responsaveis", "estoque_locais", column: "local_id"
   add_foreign_key "estoque_local_responsaveis", "users"
+  add_foreign_key "estoque_movimentacao_itens", "estoque_itens", column: "item_id"
+  add_foreign_key "estoque_movimentacao_itens", "estoque_movimentacoes", column: "movimentacao_id"
   add_foreign_key "estoque_movimentacoes", "estoque_locais", column: "destino_local_id"
   add_foreign_key "estoque_movimentacoes", "estoque_locais", column: "origem_local_id"
   add_foreign_key "estoque_movimentacoes", "estoque_produtos", column: "produto_id"

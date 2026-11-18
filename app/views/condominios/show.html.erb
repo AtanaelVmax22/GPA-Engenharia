@@ -62,6 +62,60 @@
           <span>Editar</span>
         <% end %>
 
+
+<% autorizado =
+  current_user.admin? ||
+  CondominioTecnico.exists?(
+    condominio_id: @condominio.id,
+    user_id: current_user.id
+  )
+%>
+
+<% if autorizado %>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+
+    <%= link_to new_estoque_entradas_avulsa_path(
+      condominio_id: @condominio.id
+    ), class: "flex items-center gap-4 rounded-xl border border-zinc-700 bg-zinc-900 p-5 hover:border-amber-500 transition-colors" do %>
+
+      <span class="text-3xl">📦</span>
+
+      <div>
+        <div class="font-semibold text-zinc-100">
+          Entrada Direta de Fornecedor
+        </div>
+
+        <p class="text-sm text-zinc-400 mt-1">
+          Cadastrar equipamento recebido diretamente
+          da loja, pela câmera ou manualmente.
+        </p>
+      </div>
+    <% end %>
+
+    <%= link_to new_estoque_instalaco_path(
+      condominio_id: @condominio.id
+    ), class: "flex items-center gap-4 rounded-xl border border-zinc-700 bg-zinc-900 p-5 hover:border-amber-500 transition-colors" do %>
+
+      <span class="text-3xl">🔧</span>
+
+      <div>
+        <div class="font-semibold text-zinc-100">
+          Instalar Equipamento
+        </div>
+
+        <p class="text-sm text-zinc-400 mt-1">
+          Registrar instalação, patrimônio,
+          localização e técnico responsável.
+        </p>
+      </div>
+    <% end %>
+
+  </div>
+<% end %>
+
+
+
+
       </div>
     </div>
 
